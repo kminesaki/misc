@@ -1,0 +1,321 @@
+\documentclass[aspectratio=169, 12pt]{beamer}
+
+% --- Language and Fonts ---
+\usepackage{fontspec}
+\usepackage[english]{babel}
+\usepackage{amsmath, amssymb, bm}
+% tikz
+\usepackage{tikz}
+\usetikzlibrary{shapes, arrows.meta, positioning, shadows, calc}
+
+% --- Bibliography (BibTeX + natbib) ---
+\usepackage{natbib}
+\bibliographystyle{chicago} 
+
+% =========================================
+% ===== keybox ====================
+% =========================================
+\usepackage[most]{tcolorbox}
+\newtcolorbox{keybox}[1]{
+  enhanced,
+  colback=headbg!4,
+  colframe=headbg,
+  coltitle=headfg,
+  colbacktitle=headbg,
+  title=#1,
+  fonttitle=\bfseries,
+  boxrule=0.8pt,
+  arc=1.5mm,
+  left=2mm,
+  right=2mm,
+  top=1mm,
+  bottom=1mm,
+  before skip=0.2cm,
+  after skip=0.2cm
+}
+
+\usepackage{booktabs}
+
+% =========================================
+% ===== Custom Footline (Page Number) =====
+% =========================================
+
+
+\setbeamercolor{footline}{fg=headbg}
+\setbeamerfont{footline}{size=\scriptsize}
+
+\setbeamertemplate{footline}{%
+  \hfill%
+  \usebeamercolor[fg]{footline}%
+  \usebeamerfont{footline}%
+  \insertframenumber\,/\,\inserttotalframenumber\kern1em\vskip3pt%
+}
+
+\setbeamertemplate{navigation symbols}{}
+
+\usetheme{default}
+\usepackage{xcolor}
+
+\definecolor{headbg}{RGB}{30, 60, 120}
+\definecolor{headfg}{RGB}{255, 255, 255}
+\definecolor{accent}{RGB}{200, 50, 50}
+
+\setbeamercolor{headline}{bg=headbg, fg=headfg}
+\setbeamercolor{section in head/foot}{bg=headbg, fg=headfg}
+\setbeamercolor{subsection in head/foot}{bg=headbg!80, fg=headfg}
+\setbeamercolor{frametitle}{bg=headbg, fg=headfg}
+
+% Step indicator command
+\newcommand{\stepindicator}[1]{%
+  \hfill {\scriptsize \textit{\textcolor{headbg}{Step #1 / 6}}}%
+}
+\DeclareMathOperator*{\argmin}{arg\,min}
+
+\usepackage{hyperref}
+
+
+% --- Title ---
+\title[]{A First Course in Causal Inference Ch.4--5}
+\author[Kodai Minesaki]{Kodai Minesaki}
+\institute[Faculty of Engineering, The University of Tokyo]{Faculty of Engineering, The University of Tokyo}
+\date{\today}
+
+\begin{document}
+
+% --- Title Slide ---
+\begin{frame}
+\titlepage
+\end{frame}
+
+\begin{frame}
+  
+  {
+    \large
+    
+    Ch.4 Neymanian Repeated Sampling Inference in CRE
+  }
+
+\end{frame}
+
+\begin{frame}{Ch.4 Neymanian Repeated Sampling Inference in CRE}
+  \begin{itemize}
+    \item \citet{neyman1923application} has proposed an unbiased point estimator and a conservative confidence interval based on the sampling distribution of the point estimator
+    \item This chapter covers \citet{neyman1923application}'s fundamental parts.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{4.1 Finite population quantities}
+  \begin{itemize}
+    \item Setup: CRE with $n$ units (treatement group: $n_1$ units, control group: $n_0$ units); For $i=1,...,n$, potential outcomes $Y_i(1)$ and $Y_i(0)$ and individual effect $\tau_i = Y_i(1)-Y_i(0)$.
+    \item We then obtain finite population means:
+    \[
+    \overline{Y}(1) = \frac{1}{n}\sum_{i=1}^{n}Y_i(1), \quad \overline{Y}(0) = \frac{1}{n}\sum_{i=1}^{n}Y_i(0),
+    \]
+    \item variances:
+    \[
+    S^2(1) = \frac{1}{n-1}\sum_{i=1}^{n}\{Y_i(1)-\overline{Y}(1)\}^2, \quad S^2(0) = \frac{1}{n-1}\sum_{i=1}^{n}\{Y_i(0)-\overline{Y}(0)\}^2,
+    \]
+    \item and covariance:
+    \[
+    S(1,0) = \frac{1}{n-1}\sum_{i=1}^{n}\{Y_i(1)-\overline{Y}(1)\}\{Y_i(0)-\overline{Y}(0)\}.
+    \]
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{4.1 Finite population quantities}
+  \begin{itemize}
+    \item The individual effects have mean
+    \[
+    \tau = \frac{1}{n}\sum_{i=1}^{n}\tau_i = \overline{Y}(1)-\overline{Y}(0), 
+    \]
+    \item and variance
+    \[
+    S^2(\tau) = \frac{1}{n-1}\sum_{i=1}^{n}(\tau_i-\tau)^2
+    \]
+  \end{itemize}
+  We then have
+  \begin{keybox}{Lemma 4.1}
+    \[
+    2S(1,0) = S^2(1)+S^2(0) - S^2(\tau).
+    \]
+  \end{keybox}
+\end{frame}
+
+\begin{frame}{4.2 \citet{neyman1923application}'s theorem}
+  \begin{itemize}
+    \item We are interested in estimating the average causal effect $\tau$ based on the (observed) data $(Z_i, Y_i)_{i=1}^{n}$ from a CRE.
+    \item Based on the observed data, the sample means:
+    \[
+    \widehat{\overline{Y}}(1) = \frac{1}{n}\sum_{i=1}^{n}Z_iY_i, \quad \widehat{\overline{Y}}(0) = \frac{1}{n}\sum_{i=1}^{n}(1-Z_i)Y_i,
+    \]
+    \item and the sample variances:
+    \[
+    \widehat{S}^2(1) = \frac{1}{n_1-1}\sum_{i=1}^{n}Z_i\{Y_i-\widehat{\overline{Y}}(1)\}^2, \quad \widehat{S}^2(0) = \frac{1}{n_0-1}\sum_{i=1}^{n}(1-Z_i)\{Y_i-\widehat{\overline{Y}}(0)\}^2.
+    \]
+    \item Obviously, there are no sample covariance and $S^2(\tau)$ because \textbf{we cannot observe both potential outcomes for each unit}.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{4.2 \citet{neyman1923application}'s theorem}
+  \begin{keybox}{Theorem 4.1}
+    \begin{enumerate}
+      \item the difference-in-means estimator $\widehat{\tau}=\widehat{\overline{Y}}(1)-\widehat{\overline{Y}}(0)$ is unbiased for $\tau$:$$\mathbb{E}[\widehat{\tau}]=\tau.$$
+      \item $\widehat{\tau}$ has variance
+      \[
+      \operatorname{var}(\widehat{\tau}) = \frac{S^2(1)}{n_1} + \frac{S^2(0)}{n_0} - \frac{S^2(\tau)}{n} = \frac{n_0}{n_1n}S^2(1)+\frac{n_1}{n_0n}S^2(0) + \frac{2}{n}S(1,0).
+      \]
+      \item the variance estimator $\widehat{V} = \frac{\widehat{S}^2(1)}{n_1} + \frac{\widehat{S}^2(0)}{n_0}$ is conservative for estimating $\operatorname{var}(\widehat{\tau})$ in the sense that $\mathbb{E}[\widehat{V}]-\operatorname{var}(\widehat{\tau}=\frac{S^2(\tau)}{n})\geq0$ with equality holding if and only if $\tau_i=\tau$ for all units.
+    \end{enumerate}
+  \end{keybox}
+\end{frame}
+
+\begin{frame}{4.2 \citet{neyman1923application}'s theorem}
+  \begin{itemize}
+    \item The FRT works for any test statistic but \citet{neyman1923application}'s theorem is only about the difference in means.
+    \item If $S(1,0)>0$, then those treated units also have relatively large control potential outcomes\footnote{In other words, large control potential outcomes are not ``observed.''}. $\leadsto$ the observed outcomes under control are relatively small $\leadsto$ large $\widehat{\tau}$.
+    \item If $S(1,0)<0$, the those treated units have relatively small control potential outcomes\footnote{In other words, small control potential outcomes are not ``observed.''}. $\leadsto$ the observed outcomes under control are relatively large $\leadsto$ small $\widehat{\tau}$.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{4.2 \citet{neyman1923application}'s theorem}
+  \begin{keybox}{Thoerem 4.2}
+    Let $n\to \infty$ and $n_i\to \infty$. If $\dfrac{n_1}{n}$ has a limiting value in $(0,1)$, $\{S^2(1), S^2(0), S(1,0)\}$ have limiting values, and 
+    \begin{equation}
+      \max_{1\leq i\leq n}\frac{\{Y_i(1)-\overline{Y}(1)\}^2}{n}\to 0,\quad \max_{1\leq i\leq n}\frac{\{Y_i(1)-\overline{Y}(0)\}^2}{n}\to 0,
+      \label{eq:thm4.2-1}
+    \end{equation}
+    then 
+    \begin{equation}
+      \frac{\widehat{\tau}-\tau}{\sqrt{\operatorname{var}(\widehat{\tau})}}\xrightarrow[d]{}\mathcal{N}(0,1),
+      \label{eq:thm4.2-2}
+    \end{equation}
+    and
+    \begin{equation}
+      \widehat{S}^2(1)\xrightarrow[p]{}S^2(1), \quad \widehat{S}^2(1)\xrightarrow[p]{}S^2(0)
+      \label{eq:thm4.2-3}
+    \end{equation}
+    \label{thm4.2}
+  \end{keybox}
+\end{frame}
+
+\begin{frame}{4.2 \citet{neyman1923application}'s theorem}
+  The intuitive understanding for Thm.~4.2 is:
+  \begin{itemize}
+    \item Eq.~\ref{eq:thm4.2-1}: potential outcomes for each unit are not extremely large to dominate the variability\footnote{Formally, $\max_{1\leq i \leq n}\|Y_i(1)-\overline{Y}(1)\|=o(\sqrt{n})$.}. 
+    \item Suppose a case one unit has an extremely large outcome, then $\widehat{\tau}$ depends on which group the unit belongs to: Eq.~\ref{eq:thm4.2-2} does not hold.
+    \item Eq.~\ref{eq:thm4.2-3} ensures \citet{neyman1923application}'s conservative CI for $\tau$, because $\widehat{V}\geq \operatorname{var}(\widehat{\tau})$.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{4.3 Proofs}
+  Unbiasedness of $\widehat{\tau}$:
+  {\small
+  \begin{align*}
+    \widehat{\tau} 
+    = \frac{1}{n_1}\sum_{i=1}^{n}Z_iY_i - \frac{1}{n_0}\sum_{i=1}^{n}(1-Z_i)Y_i
+    =\frac{1}{n_1}\sum_{i=1}^{n}Z_iY_i(1) - \frac{1}{n_0}\sum_{i=1}^{n}(1-Z_i)Y_i(0),
+  \end{align*}
+  then
+  \begin{align*}
+    \mathbb{E}[\widehat{\tau}] 
+    &=\mathbb{E}\left[\frac{1}{n_1}\sum_{i=1}^{n}Z_iY_i(1) - \frac{1}{n_0}\sum_{i=1}^{n}(1-Z_i)Y_i(0)\right] \\
+    &=\frac{1}{n_1}\sum_{i=1}^{n}\mathbb{E}[Z_i]\,Y_i(1) - \frac{1}{n_0}\sum_{i=1}^{n}\mathbb{E}[1-Z_i]\,Y_i(0) \\
+    &= \frac{1}{n_1}\sum_{i=1}^{n}\frac{n_1}{n}Y_i(1) - \frac{1}{n_0}\sum_{i=1}^{n}\frac{n_0}{n}Y_i(0)
+    = \frac{1}{n}\sum_{i=1}^{n}Y_i(1) - \frac{1}{n}\sum_{i=1}^{n}Y_i(0) = \tau. \quad \Box
+  \end{align*}
+  }
+\end{frame}
+
+\begin{frame}{4.3 Proofs}
+  $\operatorname{var}(\widehat{\tau})$:
+  {\small
+  We write $\widehat{\tau}$ as
+  \[
+  \widehat{\tau} = \sum_{i=1}^{n}Z_i\left\{\frac{Y_i(1)}{n_1}+\frac{Y_i(0)}{n_0}\right\} - \frac{1}{n_0}\sum_{i=1}^{n}Y_i(0).
+  \]
+  Then, the variance of $\widehat{\tau}$ follows:
+  \begin{align*}
+    \operatorname{var}(\widehat{\tau}) 
+    &= \frac{n_1n_0}{n(n-1)}\sum_{i=1}^{n}\left\{\frac{Y_i(1)}{n_1}+\frac{Y_i(0)}{n_0}-\frac{\overline{Y}(1)}{n_1}-\frac{\overline{Y}(0)}{n_0}\right\}^2\\
+    &= \frac{n_1n_0}{n(n-1)}\left[\frac{1}{n_1^2}\sum_{i=1}^{n}\{Y_i(1)-\overline{Y}(1)\}^2+\frac{1}{n_0^2}\sum_{i=1}^{n}\{Y_i(0)-\overline{Y}(0)\}^2\right.\\
+    &\qquad\left.+\frac{2}{n_1n_0}\sum_{i=1}^{n}\{Y_i(1)-\overline{Y}(1)\}\{Y_i(0)-\overline{Y}(0)\}\right]\\
+    &= \frac{n_0}{n_1n}S^2(1) + \frac{n_1}{n_0n}S^2(0) + \frac{2}{n}S(1,0). 
+  \end{align*}
+  }
+\end{frame}
+
+\begin{frame}{4.3 Proofs}
+
+    Here, the first equality holds because of the following Lemma:
+    \begin{keybox}{Lemma C.2}
+      Under simple random sampling, the sample means are unbiased for the population means:
+      \[
+      \mathbb{E}\left[\widehat{\overline{c}}\right] = \overline{c}, \quad \mathbb{E}\left[\widehat{\overline{d}}\right] = \overline{d}.
+      \]
+      Their variances and covariance are
+      \[
+      \operatorname{var}\left(\widehat{\overline{c}}\right) = \frac{n_0}{nn_1}S_c^2,\quad \operatorname{var}\left(\widehat{\overline{d}}\right) = \frac{n_0}{nn_1}S_d^2, \quad \operatorname{cov}\left(\widehat{\overline{c}}, \widehat{\overline{d}}\right) = \frac{n_0}{nn_1}S_cd.
+      \]
+    \end{keybox}
+
+\end{frame}
+
+\begin{frame}{4.3 Proofs}
+  Let $A_i = \dfrac{Y_i(1)}{n_1}+\dfrac{Y_i(0)}{n_0}$, then $\operatorname{var}(\widehat{\tau}) = \operatorname{var}\left(\sum_{i=1}^{n}Z_iA_i\right)$. In a CRE, we draw a simple random sample of size $n_1$ for a treatment group. Then, $\overline{A} = \dfrac{1}{n_1}\sum_{_i=1}^{n}Z_iA_i.$ Following Lemma~C.2, $\operatorname{var}(\overline{A})=\dfrac{n_0}{nn_1}S_A^2$. Hence, 
+  \begin{align*}
+    \operatorname{var}(\widehat{\tau}) = \operatorname{var}\left(\sum_{i=1}^{n}Z_iA_i\right) 
+    = \operatorname{var}(n_1\overline{A}) = n_1^2\operatorname{\overline{A}}
+    = n_1^2 \frac{n_0}{nn_1}S_A^2 = \frac{n_0n_1}{n}S_A^2.
+  \end{align*}
+  Because $S_A^2 = \dfrac{1}{n-1}\sum_{i=1}^{n}\{A_i-\overline{A}\}^2$, we obtain $\operatorname{var}(\widehat{\tau}) = \dfrac{n_0n_1}{n(n-1)}\sum_{i=1}^{n}\left\{\dfrac{Y_i(1)}{n_1}+\dfrac{Y_i(0)}{n_0}-\dfrac{\overline{Y}(1)}{n_1}-\dfrac{\overline{Y}(0)}{n_0}\right\}^2$
+\end{frame}
+
+\begin{frame}{4.3 Proofs}
+  From Lemma~4.1, we also write the variance as 
+  \[
+  \operatorname{\widehat{\tau}} = \frac{n_0}{n_1n}S^2(1) + \frac{n_1}{n_0n}S^2(0) + \frac{1}{n}(S^2(1)+S^2(0)-S^2(\tau)) = \frac{S^2(1)}{n_1} + \frac{S^2(0)}{n_0} - \frac{S^2(\tau)}{n}. \quad \Box
+  \]
+\end{frame}
+
+\begin{frame}{4.4 Regression analysis of the CRE}
+  \begin{itemize}
+    \item Practitioners often use regression-based inference for the average causal effect $\tau$.
+    \item A standard approach is OLS: $$(\widehat{\alpha}, \widehat{\beta}) = \argmin_{(a,b)}\sum_{i=1}^{n}(Y_i-a-bZ_i)^2.$$
+    \item Here, $\widehat{\tau} = \widehat{\beta}$.
+    \item However, the usual variance estimator from the OLS equals
+    \[
+    \widehat{V}_\text{OLS} = \frac{n(n_1-1)}{(n-2)n_1n_0}\widehat{S}^2(1) + \frac{n(n_0-1)}{(n-2)n_1n_0}\widehat{S}^2(0) \approx \frac{\widehat{S}^2(1)}{n_0} + \frac{\widehat{S}^2(0)}{n_1},
+    \]
+    where the approximation holds with large $n_1$ and $n_0$ (it can differ).
+    \item EHW robust variance estimator is closer to $\widehat{V}$ and HC2 varianct of the EHW robust variance estimator is identical to $\widehat{V}$.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+
+  {
+    \large
+    Ch.5 Stratification and Post-Stratification in Randomized Experiments
+  }
+  
+\end{frame}
+
+\begin{frame}{Ch.5 Stratification and Post-Stratification in Randomized Experiments}
+  This chapter explains the meaning of the following quote:
+  \begin{quotation}
+    Block what you can and randomize what you cannot. \\
+    -- \ \citet{box1978statistics}
+  \end{quotation}
+\end{frame}
+
+% =========================
+
+% =========================
+\section{}
+\begin{frame}[allowframebreaks, noframenumbering]{References}
+  \beamerdefaultoverlayspecification{}
+  \small
+  \bibliography{references}
+\end{frame}
+
+\end{document}

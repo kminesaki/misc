@@ -1,0 +1,15 @@
+\begin{thebibliography}{}
+
+\bibitem[\protect\citeauthoryear{Box, Hunter, Hunter, et~al.}{Box
+  et~al.}{1978}]{box1978statistics}
+Box, G.~E., W.~H. Hunter, S.~Hunter, et~al. (1978).
+\newblock {\em Statistics for experimenters}, Volume 664.
+\newblock John Wiley and sons New York.
+
+\bibitem[\protect\citeauthoryear{Neyman}{Neyman}{1923}]{neyman1923application}
+Neyman, J. (1923).
+\newblock On the application of probability theory to agricultural experiments.
+  essay on principles.
+\newblock {\em Ann. Agricultural Sciences\/}, 1--51.
+
+\end{thebibliography}
