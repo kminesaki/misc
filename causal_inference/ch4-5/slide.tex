@@ -592,8 +592,19 @@
   \end{itemize}
 \end{frame}
 
-\begin{frame}{5.4 Post-stratification in a CRE}
-  
+\begin{frame}[label=cre_sre]{5.4 Post-stratification in a CRE}
+    Let $\bm{n}=\{n_{[k]1},n_{[k]0}\}_{k=1}^K$, then a CRE becomes an SRE, because 
+    \begin{equation}
+      \operatorname{pr}_{CRE}(\bm{Z}=\bm{z}\mid \bm{n}) = \frac{\operatorname{pr}_{CRE}(\bm{Z}=\bm{z},\bm{n})}{\operatorname{pr}_{CRE}(\bm{n})} = \frac{1}{\prod_{k=1}^{K}\begin{pmatrix}
+      n_{[k]}\\n_{[k]1}
+    \end{pmatrix}}.
+    \label{eq:cre_sre}
+    \end{equation}
+    
+    \vfill
+    \hfill\hyperlink{pf-cre_sre<1>}{\beamergotobutton{Proof}}\\
+
+    Eq.~\eqref{eq:cre_sre} means that the conditional distribution of $\bm{Z}$ from a CRE given $\bm{n}$ is identical to the distribution of $\bm{Z}$ from an SRE.
 \end{frame}
 
 \begin{frame}{5.4 Post-stratification in a CRE}
@@ -664,6 +675,12 @@
   \vfill
   \hfill\hyperlink{sre_var_diff<1>}{\beamerreturnbutton{Back}}
   
+\end{frame}
+
+\begin{frame}[label=pf_cre_sre]{Proof of Eq.~\eqref{eq:cre_sre}}
+  The first equality is obvious. 
+  \vfill
+  \hfill\hyperlink{cre_sre<1>}{\beamerreturnbutton{Back}}
 \end{frame}
 
 
