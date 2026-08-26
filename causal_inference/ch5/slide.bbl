@@ -1,0 +1,16 @@
+\begin{thebibliography}{}
+
+\bibitem[\protect\citeauthoryear{Box, Hunter, Hunter, et~al.}{Box
+  et~al.}{1978}]{box1978statistics}
+Box, G.~E., W.~H. Hunter, S.~Hunter, et~al. (1978).
+\newblock {\em Statistics for experimenters}, Volume 664.
+\newblock John Wiley and sons New York.
+
+\bibitem[\protect\citeauthoryear{Hodges~Jr and Lehmann}{Hodges~Jr and
+  Lehmann}{2011}]{hodges2011rank}
+Hodges~Jr, J.~L. and E.~L. Lehmann (2011).
+\newblock Rank methods for combination of independent experiments in analysis
+  of variance.
+\newblock In {\em Selected works of EL Lehmann}, pp.\  403--418. Springer.
+
+\end{thebibliography}
