@@ -1,0 +1,288 @@
+\documentclass[aspectratio=169, 12pt]{beamer}
+
+% --- Language and Fonts ---
+\usepackage{fontspec}
+\usepackage[english]{babel}
+\usepackage{amsmath, amssymb, bm}
+% tikz
+\usepackage{tikz}
+\usetikzlibrary{shapes, arrows.meta, positioning, shadows, calc}
+
+% --- Bibliography (BibTeX + natbib) ---
+\usepackage{natbib}
+\bibliographystyle{chicago} 
+
+% =========================================
+% ===== keybox ====================
+% =========================================
+\usepackage[most]{tcolorbox}
+\newtcolorbox{keybox}[1]{
+  enhanced,
+  colback=headbg!4,
+  colframe=headbg,
+  coltitle=headfg,
+  colbacktitle=headbg,
+  title=#1,
+  fonttitle=\bfseries,
+  boxrule=0.8pt,
+  arc=1.5mm,
+  left=2mm,
+  right=2mm,
+  top=1mm,
+  bottom=1mm,
+  before skip=0.2cm,
+  after skip=0.2cm
+}
+
+\usepackage{booktabs}
+
+% =========================================
+% ===== Custom Footline (Page Number) =====
+% =========================================
+
+
+\setbeamercolor{footline}{fg=headbg}
+\setbeamerfont{footline}{size=\scriptsize}
+
+\setbeamertemplate{footline}{%
+  \hfill%
+  \usebeamercolor[fg]{footline}%
+  \usebeamerfont{footline}%
+  \insertframenumber\,/\,\inserttotalframenumber\kern1em\vskip3pt%
+}
+
+\setbeamertemplate{navigation symbols}{}
+
+\usetheme{default}
+\usepackage{xcolor}
+
+\definecolor{headbg}{RGB}{30, 60, 120}
+\definecolor{headfg}{RGB}{255, 255, 255}
+\definecolor{accent}{RGB}{200, 50, 50}
+
+\setbeamercolor{headline}{bg=headbg, fg=headfg}
+\setbeamercolor{section in head/foot}{bg=headbg, fg=headfg}
+\setbeamercolor{subsection in head/foot}{bg=headbg!80, fg=headfg}
+\setbeamercolor{frametitle}{bg=headbg, fg=headfg}
+
+% Step indicator command
+\newcommand{\stepindicator}[1]{%
+  \hfill {\scriptsize \textit{\textcolor{headbg}{Step #1 / 6}}}%
+}
+\DeclareMathOperator*{\argmin}{arg\,min}
+
+\usepackage{hyperref}
+
+
+% --- Title ---
+\title[]{A First Course in Causal Inference Ch~6}
+\author[Kodai Minesaki]{Kodai Minesaki}
+\institute[Faculty of Engineering, The University of Tokyo]{Faculty of Engineering, The University of Tokyo}
+\date{\today}
+
+\begin{document}
+
+% --- Title Slide ---
+\begin{frame}
+\titlepage
+\end{frame}
+
+
+\begin{frame}
+
+  {
+    \large
+    Ch.~6 Randomization and Regression Adjustment
+  }
+  
+\end{frame}
+
+\begin{frame}{Ch.~6 Randomization and Regression Adjustment}
+  \begin{itemize}
+    \item Stratification and post-stratification is for design and analysis with discrete covariates.
+    \item How should we deal with multidimensional, possibly continuous covariates?
+  \end{itemize}
+  \begin{table}
+    \centering
+    \begin{tabular}{lcc}
+      \toprule
+      & design & analysis \\
+      \midrule
+      discrete covariate & stratification & analysis \\
+      general covariate & rerandomization & regression adjustment\\
+      \bottomrule
+    \end{tabular}
+  \end{table}
+\end{frame}
+
+\begin{frame}{6.1 Rerandomization}
+  \begin{itemize}
+    \item Setup: a finite population of $n$ units; $n_1$ units in a treatment group; $n_0$ in a control group; $\bm{Z}=(Z_i,..,Z_n)$ is the treatment vector for these units; and unit $i$ has covariate $X_i\in \mathbb{R}^{K}$\footnote{This covariate $X_i$ can have continuous or binary components}.
+    \item Stack them as an $n\times K$ covariate matrix $\bm{X}=(X_1, \dots,X_n)^{T}$ and center them as mean zero $\overline{X}=\dfrac{1}{n}\sum_{i=1}^{n}X_i=0$.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[label=neymanian_cov]{6.1 Rerandomization}
+  \begin{itemize}
+    \item In a CRE, the covariates in the treatment and control groups are balanced \textbf{on average} (\textit{not for every stratum!}). Namely, let
+    \[
+    \widehat{\tau}_X = \frac{1}{n_1}\sum_{i=1}^{n}Z_iX_i-\frac{1}{n_0}\sum_{i=1}^{n}(1-Z_i)X_i,
+    \]
+    then $\mathbb{E}[\widehat{\tau}_X]=0$.
+    \item In the realized treatment allocation, the realized value of $\widehat{\tau}_X$ is often not zero.
+    \item Building on \citet{neyman1923application}, 
+    \begin{equation}
+    \operatorname{cov}(\widehat{\tau}_X) = \frac{S_X^2}{n_1}+ \frac{S_X^2}{n_0} = \frac{n}{n_1n_0}S_X^2,
+    \label{eq:neymanian_cov}
+    \end{equation}
+    where $S_X^2=\dfrac{1}{n_1}\sum_{i=1}^{n}X_iX_i^T$ is the finite-population covariance matrix of the covariates.
+    \vfill
+    \hfill\hyperlink{pr-neymanian_cov<1>}{\beamergotobutton{Proof}}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{6.1 Rerandomization}
+  \begin{keybox}{Definition 6.0 Mahalanobis Distance}
+  Given a probability distribution $Q\in \mathbb{R}^N$, with mean $\bm{\mu}=(\mu_1,\dots,\mu_N)^T$ and positive semi-definite covariance matrix $\bm{\Sigma}$, the Mahalanobis distance of a point $\bm{x}=(x_1,\dots,x_N)^T$ from $Q$ is defined as:
+  \[
+  M(\bm{x},Q) 
+  = \sqrt{(\bm{x}-\bm{\mu})^T\bm{\Sigma}^{-1}(\bm{x}-\bm{\mu})}.
+  \]
+  Let $\bm{y}=(y_1,\dots,y_N)^T$ be another point, then the Mahalaanobis distance between $\bm{x}$ and $\bm{y}$ is defined as:
+  \[
+  M(\bm{x},\bm{y}) 
+  = \sqrt{(\bm{x}-\bm{y})^T\bm{\Sigma}^{-1}(\bm{x}-\bm{y})}.
+  \]
+  \label{def:mahalanobis}
+  \end{keybox}
+\end{frame}
+
+\begin{frame}[label=lemma:6_1]{6.1 Rerandomization}
+  Following Def.~\ref{def:mahalanobis}, the difference between the treatment and control groups is 
+  \[
+  M 
+  = \widehat{\tau}_X^T\operatorname{cov}(\widehat{\tau}_X)^{-1}\widehat{\tau}_X 
+  = \widehat{\tau}_X^T\left(\frac{n}{n_1n_0}S_X^2\right)^{-1}\widehat{\tau}_X.
+  \]
+  \begin{itemize}
+    \item $M$ is meaningful only if $S_X^2$ is invertible.
+    \item $M$ is invariant under non-degenerate linear transformation of $X$.
+  \end{itemize}
+  \begin{keybox}{Lemma 6.1}
+    $M$ remains the same if we transform $X_i$ to $b_0+BX_i$ for all units $i=1,\dots,n$ where $b_0\in \mathbb{R}^K$ and $B\in\mathbb{R}^{K\times K}$ is invertible.
+    \label{lemma1}
+    \vfill
+    \hfill\hyperlink{pf-lemma:6_1<1>}{\beamergotobutton{Proof}}
+  \end{keybox}
+\end{frame}
+
+\begin{frame}{6.1 Rerandomization}
+  \begin{itemize}
+    \item With large $n$, the Mahalanobis distance $M$ is approximately $\chi_K^2$ under the CRE.
+    \item Rerandomization avoids covariate imbalance by discarding the treatment allocations with large values of $M$.
+  \end{itemize}
+  \begin{keybox}{Definition 6.1 ReM(Rerandomization)}
+    Draw $\bm{Z}$ from CRE and accept it if and only if 
+    \[
+    M \leq a,
+    \]
+    for some predetermined constant $a>0$.
+  \end{keybox}
+  \begin{itemize}
+    \item When $a=\infty$, we just conduct a CRE.
+    \item When $a=0$, there are very few feasible treatment allocations, then consequently, the experiment has little randomness.
+    \item In practice, we choose a small but not too extreme $a$ or some upper quantile of a $\chi_K^2$ distribution.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{6.1 Rerandomization}
+  \begin{itemize}
+    \item When $a=\infty$, we just conduct a CRE.
+    \item When $a=0$, there are very few feasible treatment allocations, then consequently, the experiment has little randomness.
+    \item In practice, we choose a small but not too extreme $a$ or some upper quantile of a $\chi_K^2$ distribution.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{6.1 Rerandomization}
+  \begin{keybox}{Condition~6.1}
+    As $n\to \infty$,
+    \begin{itemize}
+      \item $\dfrac{n_1}{n}$ and $\dfrac{n_0}{n}$ have positive limits;
+      \item the finite population covariance of $\{X_i, Y_i(1), Y_i(0), \tau_i\}$ has a finite limit;
+      \item $\max_{1\leq i \leq n}\dfrac{\{Y_i(1)-\overline{Y}(1)\}^2}{n}\to 0$, $\max_{1\leq i\leq n}\dfrac{\{Y_i(0)-\overline{Y}(0)\}^2}{n}\to 0$ and $\max_{1 \leq i \leq n}\dfrac{X_i^TX_i}{n}\to 0$.
+    \end{itemize}
+    \label{condition1:reg_cond}
+  \end{keybox}
+\end{frame}
+
+\begin{frame}{6.1 Rerandomization}
+  
+  {\small
+    Let 
+  \[
+  L_{K,a}\sim D_1 \mid \bm{D}^T\bm{D} \leq a,
+  \]
+  where $\bm{D}=(D_1,\dots,D_K)$ follows a $K$-dimensional standard Normal distribution; let $\varepsilon$ follow a univariate standard Normal distribution; and $L_{K,a}\perp \varepsilon$.}
+  \begin{keybox}{Theorem~6.1}
+    Under ReM with $M\leq a$ and Condition~\ref{condition1:reg_cond}, we have
+    \[
+    \widehat{\tau}-\tau \sim \sqrt{\operatorname{var}(\widehat{\tau})}\left\{\sqrt{R^2}L_{K,a}+\sqrt{1-R^2}\varepsilon\right\},
+    \]
+    where 
+    \[
+    \operatorname{var}(\widehat{\tau}) = \frac{S^2(1)}{n_1}+\frac{S^2(0)}{n_0} - \frac{S^2(\tau)}{n}
+    \]
+    is a \citet{neyman1923application}'s variance formula and $R^2=\operatorname{corr}^2(\widehat{\tau},\widehat{\tau}_X)$ is the squared multiple correlation coefficient between $\widehat{\tau}$ and $\widehat{\tau}_X$. 
+  \end{keybox}
+\end{frame}
+
+\begin{frame}{6.1 Rerandomization}
+  Geometric interpretation of Thm.~6.1: TBA.
+\end{frame}
+
+\begin{frame}{6.1 Rerandomization}
+  \begin{keybox}{Proposition 6.1}
+    Under the CRE, we have
+    \[
+    R^2 = \operatorname{corr}^2(\widehat{\tau}, \widehat{\tau}_X) = \frac{\dfrac{S^2(1\mid X)}{n_1} + \dfrac{S^2(0\mid X)}{n_0} - \dfrac{S^2(\tau \mid X)}{n}}{\dfrac{S^2(1)}{n_1} + \dfrac{S^2(0)}{n_0} - \dfrac{S^2(\tau)}{n}},
+    \]
+    where $\{S^2(1), S^2(0), S^2(\tau)\}$ are the finite population vasriances of $\{Y_i(1),Y_i(0), \tau_i\}_{i=1}^{n}$, and $\{S^2(1\mid x), S^2(0 \mid x), S^2(\tau\mid x)\}$ are the corresponding finite population variances of their linear projections on $(1,X_i)$. 
+  \end{keybox}
+\end{frame}
+
+\begin{frame}{6.1 Rerandomization}
+  
+\end{frame}
+
+\begin{frame}{6.1 Rerandomization}
+  
+\end{frame}
+
+
+\begin{frame}[label=pr-neymanian_cov]{Proof of Eq.~\eqref{eq:neymanian_cov}}
+  \citet{neyman1923application} derives 
+  $$\operatorname{var}(\widehat{\tau})=\frac{S^2(1)}{n_1}+\frac{S^2(0)}{n_0}-\frac{S^2(\tau)}{n}.$$
+  In this case, we replace $\widehat{\tau}$ with $\widehat{\tau}_X$ and because $X_i(0)=X_i(1)=X_i$, then $S_X^2(1)=S_X^2(0)=S_X^2$ and $S_X^2(\tau)=S_X^2\{X(1)-X(0)\}=0$. Hence,
+  \[
+  \operatorname{cov}(\widehat{\tau}_X) = \frac{1}{n_1}S_X^2 + \frac{1}{n_0}S_X^2. \quad \Box
+  \]
+  \vfill
+  \hfill\hyperlink{neymanian_cov<1>}{\beamerreturnbutton{Back}}
+\end{frame}
+
+\begin{frame}[label=pf-lemma:6_1]{Proof of Lemma~\ref{lemma1}}
+  
+  \vfill
+  \hfill\hyperlink{lemma:6_1<1>}{\beamerreturnbutton{Back}}
+\end{frame}
+% =========================
+
+% =========================
+\section{}
+\begin{frame}[allowframebreaks, noframenumbering]{References}
+  \beamerdefaultoverlayspecification{}
+  \small
+  \bibliography{../references}
+\end{frame}
+
+\end{document}
