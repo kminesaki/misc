@@ -1,5 +1,25 @@
 \begin{thebibliography}{}
 
+\bibitem[\protect\citeauthoryear{Fisher}{Fisher}{1934}]{fisher1934statistical}
+Fisher, R.~A. (1934).
+\newblock Statistical methods for research workers.
+
+\bibitem[\protect\citeauthoryear{Freedman}{Freedman}{2008a}]{freedman2008regression_2}
+Freedman, D.~A. (2008a).
+\newblock On regression adjustments in experiments with several treatments.
+\newblock {\em Annals of Applied Statistics\/}~{\em 2}, 176--196.
+
+\bibitem[\protect\citeauthoryear{Freedman}{Freedman}{2008b}]{freedman2008regression_1}
+Freedman, D.~A. (2008b).
+\newblock On regression adjustments to experimental data.
+\newblock {\em Advances in Applied Mathematics\/}~{\em 40\/}(2), 180--193.
+
+\bibitem[\protect\citeauthoryear{Lin}{Lin}{2013}]{lin2013agnostic}
+Lin, W. (2013).
+\newblock Agnostic notes on regression adjustments to experimental data:
+  Reexamining freedman's critique.
+\newblock {\em The Annals of Applied Statistics\/}, 295--318.
+
 \bibitem[\protect\citeauthoryear{Neyman}{Neyman}{1923}]{neyman1923application}
 Neyman, J. (1923).
 \newblock On the application of probability theory to agricultural experiments.
