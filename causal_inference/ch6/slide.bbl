@@ -14,19 +14,23 @@ Freedman, D.~A. (2008b).
 \newblock On regression adjustments to experimental data.
 \newblock {\em Advances in Applied Mathematics\/}~{\em 40\/}(2), 180--193.
 
-\bibitem[\protect\citeauthoryear{Li and Ding}{Li and Ding}{2020}]{li2020rerandomization}
+\bibitem[\protect\citeauthoryear{Li and Ding}{Li and
+  Ding}{2020}]{li2020rerandomization}
 Li, X. and P.~Ding (2020).
 \newblock Rerandomization and regression adjustment.
-\newblock {\em Journal of the Royal Statistical Society Series B: Statistical Methodology\/}~{\em 82\/}(1), 241--268.
+\newblock {\em Journal of the Royal Statistical Society Series B: Statistical
+  Methodology\/}~{\em 82\/}(1), 241--268.
 
 \bibitem[\protect\citeauthoryear{Lin}{Lin}{2013}]{lin2013agnostic}
 Lin, W. (2013).
-\newblock Agnostic notes on regression adjustments to experimental data: Reexamining freedman's critique.
+\newblock Agnostic notes on regression adjustments to experimental data:
+  Reexamining freedman's critique.
 \newblock {\em The Annals of Applied Statistics\/}, 295--318.
 
 \bibitem[\protect\citeauthoryear{Neyman}{Neyman}{1923}]{neyman1923application}
 Neyman, J. (1923).
-\newblock On the application of probability theory to agricultural experiments. essay on principles.
+\newblock On the application of probability theory to agricultural experiments.
+  essay on principles.
 \newblock {\em Ann. Agricultural Sciences\/}, 1--51.
 
 \end{thebibliography}
