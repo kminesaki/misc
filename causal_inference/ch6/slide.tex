@@ -98,6 +98,7 @@
 \end{frame}
 
 \begin{frame}{Ch.~6 Randomization and Regression Adjustment}
+  Motivation
   \begin{itemize}
     \item Stratification and post-stratification is for design and analysis with discrete covariates.
     \item How should we deal with multidimensional, possibly continuous covariates?
@@ -202,10 +203,6 @@
     \end{enumerate}
     \label{condition1:reg_cond}
   \end{keybox}
-  Intuitive understanding:
-  \begin{enumerate}
-    \item 
-  \end{enumerate}
 \end{frame}
 
 \begin{frame}{6.1 Rerandomization}
@@ -213,6 +210,7 @@
   \begin{enumerate}
     \item With large $n$, neither of $n_1$ or $n_0$ is not extremely small.
     \item We exclude a sample such that e.g., the variance of $Y_i(1)$ diverges to $\infty$ as $n\to\infty$.
+    \item One unit does not dominate the sample.
   \end{enumerate}
 \end{frame}
 
@@ -229,26 +227,38 @@
     \widehat{\tau}-\tau \sim \sqrt{\operatorname{var}(\widehat{\tau})}\left\{\sqrt{R^2}L_{K,a}+\sqrt{1-R^2}\varepsilon\right\},
     \]
     where 
-    \[
-    \operatorname{var}(\widehat{\tau}) = \frac{S^2(1)}{n_1}+\frac{S^2(0)}{n_0} - \frac{S^2(\tau)}{n}
-    \]
-    is a \citet{neyman1923application}'s variance formula and $R^2=\operatorname{corr}^2(\widehat{\tau},\widehat{\tau}_X)$ is the squared multiple correlation coefficient between $\widehat{\tau}$ and $\widehat{\tau}_X$. 
+    $
+    \operatorname{var}(\widehat{\tau}) = \dfrac{S^2(1)}{n_1}+\dfrac{S^2(0)}{n_0} - \dfrac{S^2(\tau)}{n}
+    $
+    is a \citet{neyman1923application}'s variance formula and $R^2=\operatorname{corr}^2(\widehat{\tau},\widehat{\tau}_X)$ is the squared multiple correlation coefficient between $\widehat{\tau}$ and $\widehat{\tau}_X$ under the CRE. 
   \end{keybox}
 \end{frame}
 
 \begin{frame}{6.1 Rerandomization}
-  Geometric interpretation of Thm.~6.1: TBA.
+  Interpretation of Thm.~6.1
+  \begin{itemize}
+    \item $\widehat{\tau}$ decomposes into a component that is a linear combination of $\widehat{\tau}_X$ and a component that is orthogonal to $\widehat{\tau}_X$.
+    \begin{itemize}
+      \item Suppose that $X$ is pre-test score and that the higher the pre-test score is the higher the post-test score. In this case, $\widehat{\tau}-\tau$ depends on the covariate imbalance.
+      \item Even if $\widehat{\tau}_X=0$, meaning that the covariate is completely balanced, $\widehat{\tau}_X-\tau$ depends on the other factors.
+    \end{itemize}
+    \item ReM mitigates the covariate imbalance, so\dots
+    \begin{itemize}
+      \item When $R^2$ is large (huge covariance imbalance), ReM successfully decrease $\widehat{\tau}-\tau$.
+      \item When $R^2$ is small (small covariance imbalance), ReM does not decrase $\widehat{\tau}-\tau$ so much.
+    \end{itemize}
+    \item $\leadsto$ The efficiency gain due to ReM depends on $R^2$
+  \end{itemize}
 \end{frame}
 
-\begin{frame}[label=prop-6-1]{6.1 Rerandomization}
+\begin{frame}{6.1 Rerandomization}
   \begin{keybox}{Proposition 6.1}
     Under the CRE, we have
     \[
     R^2 = \operatorname{corr}^2(\widehat{\tau}, \widehat{\tau}_X) = \frac{\dfrac{S^2(1\mid X)}{n_1} + \dfrac{S^2(0\mid X)}{n_0} - \dfrac{S^2(\tau \mid X)}{n}}{\dfrac{S^2(1)}{n_1} + \dfrac{S^2(0)}{n_0} - \dfrac{S^2(\tau)}{n}},
     \]
     where $\{S^2(1), S^2(0), S^2(\tau)\}$ are the finite population vasriances of $\{Y_i(1),Y_i(0), \tau_i\}_{i=1}^{n}$, and $\{S^2(1\mid x), S^2(0 \mid x), S^2(\tau\mid x)\}$ are the corresponding finite population variances of their linear projections on $(1,X_i)$. 
-    \vfill
-    \hfill\hyperlink{pf-prop-6-1<1>}{\beamergotobutton{Proof}}
+
   \end{keybox}
 \end{frame}
 
@@ -609,11 +619,6 @@
   \hfill\hyperlink{lemma-6-1<1>}{\beamerreturnbutton{Back}}
 \end{frame}
 
-\begin{frame}[label=pf-prop-6-1]{Proof of Proposition~6.1}
-  Proof for Eq.~\eqref{eq:6.11} and \eqref{eq:6.12}
-  \vfill
-  \hfill\hyperlink{prop-6-1<1>}{\beamerreturnbutton{Back}}
-\end{frame}
 
 \begin{frame}[label=pr-lin-cov-imbalance]{Proof for Eq.~\eqref{eq:6.11} and \eqref{eq:6.12}}
 

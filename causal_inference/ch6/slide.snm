@@ -6,8 +6,6 @@
 \beamer@slide {lemma-6-1}{7}
 \beamer@slide {lemma1}{7}
 \beamer@slide {condition1:reg_cond}{9}
-\beamer@slide {prop-6-1<1>}{13}
-\beamer@slide {prop-6-1}{13}
 \beamer@slide {eq:6.3}{23}
 \beamer@slide {eq:6.4}{23}
 \beamer@slide {prop-6-2}{24}
@@ -21,9 +19,7 @@
 \beamer@slide {pr-neymanian_cov}{37}
 \beamer@slide {pr-lemma-6-1<1>}{38}
 \beamer@slide {pr-lemma-6-1}{38}
-\beamer@slide {pf-prop-6-1<1>}{39}
-\beamer@slide {pf-prop-6-1}{39}
-\beamer@slide {pr-lin-cov-imbalance<1>}{40}
-\beamer@slide {pr-lin-cov-imbalance}{40}
-\beamer@slide {pr-prop-6-3<1>}{41}
-\beamer@slide {pr-prop-6-3}{41}
+\beamer@slide {pr-lin-cov-imbalance<1>}{39}
+\beamer@slide {pr-lin-cov-imbalance}{39}
+\beamer@slide {pr-prop-6-3<1>}{40}
+\beamer@slide {pr-prop-6-3}{40}
