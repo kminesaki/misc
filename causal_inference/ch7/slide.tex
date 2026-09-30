@@ -98,12 +98,57 @@
 \end{frame}
 
 \begin{frame}{Ch.~7 Matched-Pairs Experiment}
-  Motivation
+  \begin{itemize}
+    \item The matched-pairs experiment (MPE) is the most extreme version of the SRE with only one treated unit and one control unit within each stratum.
+    \item It has its own estimation and inference strategy
+  \end{itemize}
   
 \end{frame}
 
 \begin{frame}{7.1 Design of the experiment and potential outcomes}
-  
+  \begin{itemize}
+    \item Consider an experiment with $2n$ units.
+    \item If we have predictive covariates to the outcomes, we can pair units based on the similarity of covariates.
+    \item With many covariates, we can define pairwise distances between units and the form pairs based on these distances.
+    \item We assume that the pairs are formed based on the covariates and the discuss the subsequent design and analysis issues.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{7.1 Design of the experiment and potential outcomes}
+    Setup
+    \begin{itemize}
+        \item Let $(i,j)$ index the unit $j$ in pair $i$, where $i=1,\dots,n$ and $j=1,2$.
+        \item Unit $(i,j)$ has potential outcomes $Y_{ij}(1)$ and $Y_{i,j}(0)$ under the treatment and control, respectively.
+        \item Within each pair, we randomly assign one into the treatment group ($Z_i=1$) and the control group ($Z_i=0$).
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{7.1 Design of the experiment and potential outcomes}
+    \small
+    \begin{keybox}{Definition~7.1 (MPE)}
+        \label{def-7-1}
+        The treatment assignments satisfy
+        \[
+        (Z_i)_{i=1}^n \overset{\text{i.i.d.}}{\sim} \operatorname{Bernoulli}\left(\tfrac{1}{2}\right).
+        \]
+        The observed outcomes within pair $i$ are
+        \[
+        Y_{i1} = Z_i Y_{i1}(1) + (1 - Z_i) Y_{i1}(0) =
+        \begin{cases}
+            Y_{i1}(1), & \text{if } Z_i = 1, \\
+            Y_{i1}(0), & \text{if } Z_i = 0,
+        \end{cases}
+        \]
+        and
+        \[
+        Y_{i2} = Z_i Y_{i2}(0) + (1 - Z_i) Y_{i2}(1) =
+        \begin{cases}
+            Y_{i2}(0), & \text{if } Z_i = 1, \\
+            Y_{i2}(1), & \text{if } Z_i = 0.
+        \end{cases}
+        \]
+        So the observed data are $(Z_i,Y_{i1},Y_{i2})_{i=1}^n$
+    \end{keybox}
 \end{frame}
 
 
