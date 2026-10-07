@@ -226,20 +226,24 @@
 \end{frame}
 
 \begin{frame}{7.3 Neymanian inference}
-    Proof of Thm.~7.1:
+    
+    {
+        \small
+        Proof of Thm.~7.1:
 
-    Recall $\sum_{i=1}^{n}(a_i-\bar{a})^2=\sum_{i=1}^{n}a_i^2-n\bar{a}^2$ and $\operatorname{var}[W]=\mathbb{E}[W^2]-(\mathbb{E}[W])^2$. Use them in the following manipulation:
-    \begin{align*}
-        n(n-1)\mathbb{E}[\widehat{V}] 
-        &= \mathbb{E}\left[\sum_{i=1}^{n}(\hat{\tau}_i-\hat{\tau})^2\right]
-        = \mathbb{E}\left[\sum_{i=1}^{n}\hat{\tau}_i^2-n\hat{\tau}^2\right]\\
-        &= \sum_{i=1}^{n}\{\operatorname{var}(\hat{\tau})+\tau_i^2\} - n\{\operatorname{var}(\hat{\tau})+\tau^2\}\\
-        &= n^2\operatorname{var}(\hat{\tau}) - n\operatorname{var}(\hat{\tau}) + \sum_{i=1}^{n}(\tau_i-\tau)^2.
-    \end{align*}
-    Therefore,
-    \[
-    \mathbb{E}[\widehat{V}] = \operatorname{var}(\hat{\tau}) + \{n(n-1)\}^{-1}\sum_{i=1}^{n}(\tau_i-\tau)^2\geq 0.\quad \Box
-    \]
+        Recall $\sum_{i=1}^{n}(a_i-\bar{a})^2=\sum_{i=1}^{n}a_i^2-n\bar{a}^2$ and $\operatorname{var}[W]=\mathbb{E}[W^2]-(\mathbb{E}[W])^2$. Use them in the following manipulation:
+        \begin{align*}
+            n(n-1)\mathbb{E}[\widehat{V}] 
+            &= \mathbb{E}\left[\sum_{i=1}^{n}(\hat{\tau}_i-\hat{\tau})^2\right]
+            = \mathbb{E}\left[\sum_{i=1}^{n}\hat{\tau}_i^2-n\hat{\tau}^2\right]\\
+            &= \sum_{i=1}^{n}\{\operatorname{var}(\hat{\tau})+\tau_i^2\} - n\{\operatorname{var}(\hat{\tau})+\tau^2\}\\
+            &= n^2\operatorname{var}(\hat{\tau}) - n\operatorname{var}(\hat{\tau}) + \sum_{i=1}^{n}(\tau_i-\tau)^2.
+        \end{align*}
+        Therefore,
+        \[
+        \mathbb{E}[\widehat{V}] = \operatorname{var}(\hat{\tau}) + \{n(n-1)\}^{-1}\sum_{i=1}^{n}(\tau_i-\tau)^2\geq 0.\quad \Box
+        \]
+    }
 \end{frame}
 
 \begin{frame}{7.3 Neymanian inference}
@@ -250,8 +254,129 @@
 \end{frame}
 
 \begin{frame}{7.3 Neymanian inference}
-
+    Proof of Prop.~7.1.
 \end{frame}
+
+\begin{frame}{7.4 Covariate adjustment}
+    \begin{itemize}
+        \item Although we have matched on covariates in the design stage, it is possible that the matching is not perfect $(X_{i1}\neq X_{i2})$.
+        \item In this case, we can adjust for the covariates to further improve estimation efficiency.
+        \item Assume that each unit $(i,j)$ has covariates $X_{ij}$.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{7.4 Covariate adjustment}
+    \begin{itemize}
+        \item Define the within-pair differences in covariates: $$\hat{\tau}_{X,i} = Z_i(X_{i1}-X_{i2}) + (1-Z_i)(X_{i2}-X_{i1})=(2Z_i-1)(X_{i1}-X_{i2}),$$
+        \item and their average:
+        \[
+        \hat{\tau}_X = \frac{1}{n}\sum_{i=1}^{n}\hat{\tau}_{X,i}.
+        \]
+        \item We can show that
+        \[
+        \mathbb{E}[\hat{\tau}_{X,i}]=0,\quad \mathbb{E}[\hat{\tau}_X]=0,
+        \]
+        \item and 
+        \[
+        \operatorname{cov}(\hat{\tau}_X)=\frac{1}{n^2}\sum_{i=1}^{n}\hat{\tau}_{X,i}\hat{\tau}_{X,i}^T.
+        \]
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{7.4 Covariate adjustment}
+    \begin{itemize}
+        \item In a realized MPE, $\operatorname{cov}(\hat{\tau}_X)$ is not zero unless all the $\hat{\tau}_X$'s are zero.\\
+        $\leadsto$ Some realized values of $\hat{\tau}_{X}\neq 0$.
+        \item This is the reason why there exists imbalance and we would like to adjust the imbalance to improve estimation efficiency.
+        \item Similar to the discusion in the last chapter, consider a class of estimators:
+        \[
+        \hat{\tau}_{\gamma}=\hat{\tau}-\gamma^T\hat{\tau}_X,
+        \]
+        which $\hat{\tau}_{\gamma}-\hat{\tau}$ has mean zero for any fixed $\gamma$.
+        \item We want to choose $\gamma$ to minimize the variance of $\hat{\tau}(\gamma)$.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{7.4 Covariate adjustment}
+    \begin{itemize}
+        \item The variance of $\hat{\tau}(\gamma)$ is
+        \begin{align*}
+            \operatorname{var} 
+            &= \operatorname{var}(\hat{\tau}-\gamma^T\hat{\tau}_X) \\
+            &= \operatorname{var}(\hat{\tau}) + \gamma^T\operatorname{cov}(\hat{\tau}_X)\gamma - 2\gamma^T\operatorname{cov}(\hat{\tau}_X,\hat{\tau}),
+        \end{align*}
+        which is minimized at
+        \[
+        \tilde{\gamma} = \operatorname{cov}(\hat{\tau}_X)^{-1}\operatorname{cov}(\hat{\tau}_X,\hat{\tau}).
+        \]
+        \item Rewrite the formula for $\operatorname{cov}(\hat{\tau}_X)$ as $$\operatorname{cov}(\hat{\tau}_X) = \frac{1}{n^2}\sum_{i=1}^{n}|\hat{\tau}_{X,i}||\hat{\tau}_{X,i}|^T,$$
+        where $|\cdot|$ denotes the component-wise absolute value of a vector.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{7.4 Covariate adjustment}
+    \begin{itemize}
+        \item We can calculate $\operatorname{cov}(\hat{\tau}_X)$ but we cannot calculate $\operatorname{cov}(\hat{\tau}_X, \hat{\tau})$
+        \begin{itemize}
+            \item This is because we need unknown potential outcomes to compute this.
+        \end{itemize}
+        \item Fortunately, we can obtain an unbiased estimator for it.
+    \end{itemize}
+    \vspace{0.7cm}
+    \begin{keybox}{Theorem 7.2}
+        An unbiased estimator for $\operatorname{cov}(\hat{\tau}_X,\hat{\tau})$ is
+        \[
+        \hat{\theta} = \frac{1}{n(n-1)}\sum_{i=1}^{n}(\hat{\tau}_{X,i}-\hat{\tau}_X)(\hat{\tau}_{i}-\hat{\tau}).
+        \]
+    \end{keybox}
+\end{frame}
+
+\begin{frame}{7.4 Covariate adjustment}
+    \small
+    Substiting $\hat{\theta}$ into $\tilde{\gamma}$, then we obtain $\hat{\gamma}$ as follows:
+    \begin{align*}
+        \hat{\gamma}
+        &= \left(\frac{1}{n^2}\sum_{i=1}^{n}\hat{\tau}_{X,i}\hat{\tau}_{X,i}^T\right)^{-1}\left\{\frac{1}{n(n-1)}\sum_{i=1}^{n}(\hat{\tau}_{X,i}-\hat{\tau}_X)(\hat{\tau}_{i}-\hat{\tau})\right\}\\
+        &= \left(\frac{1}{n^2}\sum_{i=1}^{n}(\hat{\tau}_{X,i}-\hat{\tau}_X)(\hat{\tau}_{X,i}-\hat{\tau}_X)^T + \frac{1}{n^2}\cdot n\hat{\tau}_X\hat{\tau}_X^T\right)^{-1}\left\{\frac{1}{n(n-1)}\sum_{i=1}^{n}(\hat{\tau}_{X,i}-\hat{\tau}_X)(\hat{\tau}_{i}-\hat{\tau})\right\}\\
+        &\approx \left(\sum_{i=1}^{n}(\hat{\tau}_{X,i}-\hat{\tau}_X)(\hat{\tau}_{X,i}-\hat{\tau}_X)^T\right)^{-1}\left\{(\hat{\tau}_{X,i}-\hat{\tau}_X)(\hat{\tau}_{i}-\hat{\tau})\right\}.
+    \end{align*}
+    The second equality follows from $\sum_{i=1}^{n}(x_i-\bar{x})^2=\sum_{i=1}^{n}x_i^2-n\bar{x}^2$. The approximation holds from $\dfrac{n^2}{n(n-1)}\xrightarrow{n\to\infty}1$ and $\dfrac{n\hat{\tau}_X\hat{\tau}_X^T}{n^2}\xrightarrow{n\to\infty}0$.
+\end{frame}
+
+\begin{frame}{7.4 Covariate adjustment}
+    \begin{itemize}
+        \item This is approximately the coeeficient of the $\hat{\tau}_{X,i}$ in the OLS fit of the $\hat{\tau}_i$'s on the $\hat{\tau}_{X,i}$'s with an intercept.
+        \item The final estimator is
+        \[
+        \hat{\tau}_{\text{adj}} = \hat{\tau}-\hat{\gamma}^T\hat{\tau}_X,
+        \]
+        which is approximately the intercept in the OLS fit of the $\hat{\tau}_i$'s on the $\hat{\tau}_{X,i}$'s with an intercept.
+        \item The conservative variance estimator for $\hat{\tau}_{\text{adj}}$ is then
+        \begin{align*}
+            \widehat{V}_{\text{adj}}
+            &= \operatorname{var}(\hat{\tau}-\hat{\gamma}^T\hat{\tau}_X)\\
+            &= \widehat{V} + \hat{\gamma}^T\operatorname{cov}(\hat{\tau}_X)\hat{\gamma} - 2\hat{\gamma}^T\hat{\theta}\\
+            &= \widehat{V} - \hat{\theta}\operatorname{cov}(\hat{\tau}_X)^{-1}\hat{\theta}.
+        \end{align*}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{7.4 Covariate adjustment}
+    \begin{keybox}{Proposition 7.2}
+        Under the MPE, the covariance-adjusted estimator $\hat{\tau}_{\text{adj}}$ and the associated variance estimator $\widehat{V}_{\text{adj}}$ can be conviniently approximated by the intercept and the associated variance estimator from the OLS fit of the vector of the $\hat{\tau}_i$'s on the $1$'s and the matrix of the $\hat{\tau}_{X,i}$'s.
+    \end{keybox}
+    \begin{itemize}
+        \item Neither Prop.~7.1 nor ~7.2 requires the EHW correction of the variance estimator.
+        \item In the MPE, we only use a pair so we do not need to center the covariate.
+        \item Explicitly, let $\overline{X}$ be the mean covariate, then $X_{i1}-X_{i2}=(X_{i1}-\overline{X})-(X_{i2}-\overline{X})$.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{7.6 Comparing the MPE and CRE.}
+    
+\end{frame}
+
+
 
 % =========================
 
