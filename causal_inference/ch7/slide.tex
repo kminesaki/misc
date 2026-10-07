@@ -148,9 +148,110 @@
         \end{cases}
         \]
         So the observed data are $(Z_i,Y_{i1},Y_{i2})_{i=1}^n$
+        \label{def-7-1}
     \end{keybox}
 \end{frame}
 
+\begin{frame}{7.3 Neymanian inference}
+    \begin{itemize}
+        \item The average causal effect within pair $i$ is 
+        \[
+        \tau_i = \frac{1}{2}\left[\{Y_{i1}(1)-Y_{i2}(0)\} + \{Y_{i2}(1)-Y_{i1}(0)\}\right].
+        \]
+        \item and the average causal effect for all units is
+        \[
+        \tau = \frac{1}{n}\sum_{i=1}^{n}\tau_i = \frac{1}{2n}\sum_{i=1}^{n}\sum_{j=1}^{2}\{Y_{ij}(1)-Y_{ij}(0)\}.
+        \]
+        \item Both $\hat{\tau}_i$ and $\hat{\tau}$ are unbiased for $\tau_i$ and $\tau$, respectively.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{7.3 Neymanian inference}
+    We can calculate the variance of $\hat{\tau}$.
+
+    For simplicity, let $A_i=Y_{i1}(1)-Y_{i2}(0)$ and $B_i=Y_{i2}(1)-Y_{i1}(0)$. Then
+    \[
+    \hat{\tau}_i = Z_iA_i + (1-Z_i)B_i = Z_i(A_i-B_i)+B_i.
+    \]
+    Check the unbiasedness of $\hat{\tau}_i$: $$\mathbb{E}[\hat{\tau}_i] = \mathbb{E}[Z_i](A_i-B_i)+B_i = \dfrac{1}{2}(A_i-B_i)+B_i = \dfrac{A_i+B_i}{2}.\quad (\because Z_i\sim \text{Bernoulli}(1/2).)$$
+    Here, $\operatorname{var}(\hat{\tau}_i) = \operatorname{var}(Z_i(A_i-B_i)+B_i) = \operatorname{var}(Z_i)(A_i-B_i)^2=\dfrac{1}{4}(A_i-B_i)^2.$ Therefore, 
+    \[
+    \operatorname{var}(\hat{\tau}) = \operatorname{var}\left(\frac{1}{n}\sum_{i=1}^{n}\operatorname{var}(\hat{\tau}_i)\right) = \frac{1}{4n^2}\sum_{i=1}^{n}\{Y_{i1}(1)-Y_{i2}(0) + Y_{i1}(0) - Y_{i2}(1)\}. \quad\Box
+    \]
+\end{frame}
+
+\begin{frame}{7.3 Neymanian inference}
+    \begin{itemize}
+        \item We cannot follow the same strategy under the SRE to estimate the variance of $\hat{\tau}$ under the MPE.
+        \item In MPE, the within-pair sample variances of the outcomes are not well defined.
+        \begin{itemize}
+            \item In SRE, we calculate variances for a treatment group and a control group in each stratum but in MPE, there is only one in both groups in each stratum.
+        \end{itemize}
+        \item Is it possible to estimate the variance of $\hat{\tau}$ in the MPE?
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{7.3 Neymanian inference}
+    \begin{itemize}
+        \item Think about the classic i.i.d. sampling:
+        \item Suppose the $\hat{\tau}_i$'s are i.i.d. with mean $\mu$ and $\sigma^2$.
+        \item Then the variance of $\hat{\tau}=n^{-1}\sum_{i=1}^{n}\hat{\tau}_i$ is $\sigma^2/n$.
+        \item An unbiased estimator for $\sigma^2$ is $(n-1)^{-1}\sum_{i=1}^{n}(\hat{\tau}_i-\hat{\tau})^2$.  
+        \item So the unbiased estimator for $\operatorname{var}(\hat{\tau})$ is 
+        \begin{equation}
+            \widehat{V}= \frac{1}{n(n-1)}\sum_{i=1}^{n}(\hat{\tau}_i-\hat{\tau})^2.
+            \label{variance-estimator-mpe}
+        \end{equation}
+
+        \item We derive $\widehat{V}$ from a completely different setting from the MPE and a different motivation, so does it work for the MPE?
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{7.3 Neymanian inference}
+    \begin{keybox}{Theorem~7.1}
+        Under the MPE, $\widehat{V}$ defined in \eqref{variance-estimator-mpe} is a conservative estimator for the true variance of $\hat{\tau}$:
+        \[
+        \mathbb{E}[\widehat{V}] - \operatorname{var}(\hat{\tau}) = \frac{1}{n(n-1)}\sum_{i=1}^{n}(\tau_i-\tau)^2\geq 0.
+        \]
+        If the $\tau_i$'s are constant across pairs, then $\mathbb{E}[\widehat{V}] = \operatorname{var}(\hat{\tau})$.
+        \label{thm-7-1}
+    \end{keybox}
+    \begin{itemize}
+        \item Thm.~7.1 states that under the MPE,
+        \begin{enumerate}
+            \item $\widehat{V}$ is a conservative variance estimator in general;
+            \item $\widehat{V}$ is unbiased if the average causal effecsts are constant across pairs.
+        \end{enumerate}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{7.3 Neymanian inference}
+    Proof of Thm.~7.1:
+
+    Recall $\sum_{i=1}^{n}(a_i-\bar{a})^2=\sum_{i=1}^{n}a_i^2-n\bar{a}^2$ and $\operatorname{var}[W]=\mathbb{E}[W^2]-(\mathbb{E}[W])^2$. Use them in the following manipulation:
+    \begin{align*}
+        n(n-1)\mathbb{E}[\widehat{V}] 
+        &= \mathbb{E}\left[\sum_{i=1}^{n}(\hat{\tau}_i-\hat{\tau})^2\right]
+        = \mathbb{E}\left[\sum_{i=1}^{n}\hat{\tau}_i^2-n\hat{\tau}^2\right]\\
+        &= \sum_{i=1}^{n}\{\operatorname{var}(\hat{\tau})+\tau_i^2\} - n\{\operatorname{var}(\hat{\tau})+\tau^2\}\\
+        &= n^2\operatorname{var}(\hat{\tau}) - n\operatorname{var}(\hat{\tau}) + \sum_{i=1}^{n}(\tau_i-\tau)^2.
+    \end{align*}
+    Therefore,
+    \[
+    \mathbb{E}[\widehat{V}] = \operatorname{var}(\hat{\tau}) + \{n(n-1)\}^{-1}\sum_{i=1}^{n}(\tau_i-\tau)^2\geq 0.\quad \Box
+    \]
+\end{frame}
+
+\begin{frame}{7.3 Neymanian inference}
+    Both the point estimator $\hat{\tau}$ and the variance estimator $\widehat{V}$ can be conveniently obtained by OLS:
+    \begin{keybox}{Proposition 7.1}
+        $\hat{\tau}$ and $\widehat{V}$ are identical to the coefficient and variance estimator of the intercept from the OLS fit of the vector $(\hat{\tau}_1,\hat{\tau}_2,\dots,\hat{\tau}_n)^T$ on the intercept only.
+    \end{keybox}
+\end{frame}
+
+\begin{frame}{7.3 Neymanian inference}
+
+\end{frame}
 
 % =========================
 
