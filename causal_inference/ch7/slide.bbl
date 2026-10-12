@@ -1,3 +1,9 @@
 \begin{thebibliography}{}
 
+\bibitem[\protect\citeauthoryear{Imai}{Imai}{2008}]{imai2008variance}
+Imai, K. (2008).
+\newblock Variance identification and efficiency analysis in randomized
+  experiments under the matched-pair design.
+\newblock {\em Statistics in medicine\/}~{\em 27\/}(24), 4857--4873.
+
 \end{thebibliography}

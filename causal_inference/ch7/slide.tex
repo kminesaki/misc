@@ -373,9 +373,99 @@
 \end{frame}
 
 \begin{frame}{7.6 Comparing the MPE and CRE.}
-    
+    \begin{itemize}
+        \item \citet{imai2008variance} compared the MPE and CRE: the MPE gives more precise estimators if the matching is well done and the covariates are predictive of the outcomes.
+        \item Without the outcome data in the design stafe, it is hard to decide whether this is true or not.
+        \item Usually the MPE improves efficiency, it can be not true with small sample.
+        \item $\leadsto$ The MPE is not superior to the CRE based on the FRT.
+    \end{itemize}
 \end{frame}
 
+\begin{frame}{7.7 Extension to the general matched experiment}
+    \begin{itemize}
+        \item Extend the MPE to the general matched experiment with varying numbers of control units.
+        \begin{itemize}
+            \item If we consider a case with varying numbers of treatment units, it is essentially same to the case with varying numbers of control units.
+            \item If we consider a case with varying numbers of both treatment and control units, it is equivalent to the SRE.
+        \end{itemize}
+        \item Namely, $\text{MPE}\subset\text{Extended MPE}\subset\text{SRE}.$
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{7.7 Extension to the general matched experiment}
+    Setup
+    \begin{itemize}
+        \item $n$ matched sets indexed by $i=1,\dots,n$.
+        \item For the matched set $i$, $M_i+1$ units; $M_i$'s can vary.
+        \item Total number of experimental units is $N=n+\sum_{i=1}^{n}M_i$.
+        \item Let $ij$ index the unit $j$ within matched set $i\,(i=1,\dots,n\text{ and }j=1,\dots,M_i+1)$.
+        \item Unit $ij$ has potential outcomes $Y_{ij}(1)$ and $Y_{ij}(0)$.
+        \item Within set $i$, $1$ unit receives the treatment; the rest $M_i$ recerives the control.
+        \item $Z_{ij}$: the treatment indicator for unit $ij$.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{7.7 Extension to the general matched experiment}
+    \begin{itemize}
+        \item One of the potential outcomes:
+        \[
+        Y_{ij}=Z_{ij}Y_{ij}(1) + (1-Z_{ij})Y_{ij}(0).
+        \]
+        \item The average causal effect within the matched set $i$ equals:
+        \[
+        \tau_i = \frac{1}{M_i+1}\sum_{j=1}^{M_i+1}\{Y_{ij}(1)-Y_{ij}(0)\}.
+        \]
+        \item An unbised estimator of $\tau_i$ is
+        \[
+        \hat{\tau}_i=\sum_{j=1}^{M_i+1}Z_{ij}Y_{ij}-\frac{1}{M_i}\sum_{j=1}^{M_i+1}(1-Z_{ij})Y_{ij}.
+        \]
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{7.7 Extension to the general matched experiment}
+    \begin{itemize}
+        \item We first focus on estimating the average of the within-strata effects: $\tau=n^{-1}\sum_{i=1}^{n}\tau_i$.
+        \item It has an unbiased estimator: $\hat{\tau}=n^{-1}\sum_{i=1}^{n}\hat{\tau}_i$.
+        \item Importtantly, the $\tau$ above is the average of the $\tau_i$'s and it does not equal the average causal effect for the $N$ units in the experiment when the $M_i$'s vary.
+        \item The average causal effect equals
+        \[
+        \tau'=\frac{1}{N}\sum_{i=1}^{n}\sum_{j=1}^{1+M_i}\{Y_{ij}(1)-Y_{ij}(0)\} = \sum_{i=1}^{n}\frac{1+M_i}{N}\tau_i.
+        \]
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{7.7 Extension to the general matched experiment}
+    \begin{itemize}
+        \item To unify the discussion, we consider the weighted causal effect
+        \[
+        \tau_w = \sum_{i=1}^{n}w_i\tau_i, 
+        \]
+        with $\sum_{i=1}^{n}w_i=1$.
+        \item It is straightforward to obtain an unbiased estimator $\hat{\tau}_w=\sum_{i=1}^{n}w_i\hat{\tau}_i$, and calculate its variance $\operatorname{var}(\hat{\tau}_w)=\sum_{i=1}^{n}w_i^2\operatorname{var}(\hat{\tau}_i)$.
+        \item However, we have only one realized value of $\hat{\tau}_i$ so we cannot calculate $\operatorname{var}(\hat{\tau}_i)$.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{7.7 Extension to the general matched experiment}
+    \small
+    \begin{itemize}
+        \item We give a final form of the variance estimator:
+        \[
+        \hat{V}_w = \sum_{i=1}^{n}c_i(\hat{\tau}_i-\hat{\tau}_w)^2
+        \]
+        where
+        \[
+        c_i = \frac{\frac{w_i^2}{1-2w_i}}{1+\sum_{i=1}^{n}\frac{w_i^2}{1-2w_i}}.
+        \]
+    \end{itemize}
+    \begin{keybox}{Theorem}
+        Under the general matched experiment with varying $M_i$'s, if $w_i<1/2$ for all $i$'s, then
+        \[
+        \mathbb{E}[\hat{V}_w]-\operatorname{var}(\hat{\tau}/w)=\sum_{i=1}^{n}c_i(\tau_i-\tau_w)^2\geq \operatorname{var}(\hat{\tau}_w)\geq 0,
+        \]
+        with equality holding if the $\tau_i$'s are constant.
+    \end{keybox}
+\end{frame}
 
 
 % =========================
