@@ -1,3 +1,15 @@
 \begin{thebibliography}{}
 
+\bibitem[\protect\citeauthoryear{Lin}{Lin}{2013}]{lin2013agnostic}
+Lin, W. (2013).
+\newblock Agnostic notes on regression adjustments to experimental data:
+  Reexamining freedman's critique.
+\newblock {\em The Annals of Applied Statistics\/}, 295--318.
+
+\bibitem[\protect\citeauthoryear{Neyman}{Neyman}{1923}]{neyman1923application}
+Neyman, J. (1923).
+\newblock On the application of probability theory to agricultural experiments.
+  essay on principles.
+\newblock {\em Ann. Agricultural Sciences\/}, 1--51.
+
 \end{thebibliography}

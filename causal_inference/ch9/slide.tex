@@ -129,33 +129,78 @@
 \end{frame}
 
 \begin{frame}{9.1 CRE}
-  
+  \begin{itemize}
+    \item Assume $\{Z_i,Y_i(1),Y_i(0),X_i\}_{i=1}^n\overset{\text{i.i.d.}}{\sim}\{Z,Y(1),Y(0),X\}$ from a superpopulation.
+    \item With this assumption, we define the population average causal effect as $\tau=\mathbb{E}[Y(1)-Y(0)]=\mathbb{E}[Y(1)]-\mathbb{E}[Y(0)].$
+  \end{itemize}
+  \begin{keybox}{Definition 9.3 CRE under the superpopulation framework}
+    We have
+    \[
+    Z\perp \{Y(1),Y(0),X\}.
+    \]
+    The average causal effect can be written as
+    \[
+    \tau = \mathbb{E}[Y(1)\mid Z=1]-\mathbb{E}[Y(0)\mid Z=0] = \mathbb{E}[Y\mid Z=1]-\mathbb{E}[Y\mid Z=0].
+    \]
+  \end{keybox}
 \end{frame}
 
 \begin{frame}{9.1 CRE}
-  
+  \begin{itemize}
+    \item Explicitly, the first equation states that $\mathbb{E}[Y(1)]=\mathbb{E}[Y(1)\mid Z=1]$ and it implies that the mean of potential outcomes and the potential outcomes in a treatment group is equivalent. 
+    \item This is the value of randomization: we can compare the \textit{realized} outcomes across treatment and control groups.
+    \item We have
+    \[
+    \mathbb{E}[\hat{\tau}\mid Z]=\tau, \quad \operatorname{var}[\hat{\tau}\mid Z]=\frac{\operatorname{var}[Y(1)]}{n_1}+\frac{\operatorname{var}[Y(0)]}{n_0}.
+    \]
+    \item Under i.i.d. sampling, the sample variances are unbiased for the population variances so \citet{neyman1923application}'s variance estimator is unbiased for $\operatorname{var}[\hat{\tau}\mid Z]$.
+  \end{itemize}
 \end{frame}
 
 \begin{frame}{9.1 CRE}
-  
+  We can also discuss covariate adjustment. Based on the OLS decompositions, 
+  \begin{gather*}
+    Y(1)=\gamma_1+\beta_1^TX+\varepsilon(1)\\
+    Y(0)=\gamma_0+\beta_0^TX+\varepsilon(0),
+  \end{gather*}
+  we have 
+  \[
+  \tau=\mathbb{E}[Y(1)]-\mathbb{E}[Y(0)]=\gamma_1-\gamma_0+(\beta_1-\beta_0)^T\mathbb{E}[X].
+  \]
+  So the sample-version of the estimator is
+  \[
+  \hat{\tau}_{\text{adj}}=\hat{\gamma}_1-\hat{\gamma}_0+(\hat{\beta}_1-\hat{\beta}_0)^T\overline{X}.
+  \]
+  Obviously, when $\overline{X}=0$, $\hat{\tau}_{\text{adj}}=\hat{\tau}_L$ (\citet{lin2013agnostic}'s estimator.)
 \end{frame}
 
 \begin{frame}{9.1 CRE}
-  
+  Taking difference between $\tau$ and $\hat{\tau}_{\text{adj}}$,
+  \[
+  \tau - \hat{\tau}_{\text{adj}} = \underbrace{\{(\gamma_1-\gamma_0)-(\hat{\gamma}_1-\hat{\gamma}_0)\}\{\}}_{\text{Regression coefficient estimation error}} + \underbrace{\Delta \beta^T(\mathbb{E}[X]-\overline{X})}_{\text{uncertainy under the superpopulation framework}}
+  \]
+  Hence, we introduce the proposed correction of the EHW estimator by adding an extra term
+  \[
+  \frac{(\hat{\beta}_1-\hat{\beta}_0)^T S_X(\hat{\beta}_1-\hat{\beta}_0)}{n}.
+  \]
 \end{frame}
 
-\begin{frame}{9.1 CRE}
-  
+\begin{frame}{9.3 Extention to the SRE}
+  \begin{keybox}{Definition 9.4 SRE under the superpopulation framework}
+    We have
+    \[
+    Z\perp \{Y(1),Y(0)\}\mid X.
+    \]
+    The conditional average effect can be rewritten as
+    \[
+    \tau_{[k]}=\mathbb{E}[Y(1)-Y(0)\mid X=k] = \mathbb{E}[Y\mid Z=1, X=k]-\mathbb{E}[Y\mid Z=0, X=k].
+    \]
+  \end{keybox}
+  The average causal effect can be rewritten as
+  \[
+  \tau = \mathbb{E}[Y(1)-Y(0)] = \sum_{k=1}^{K}\Pr (X=k)\tau_{[k]}.
+  \]
 \end{frame}
-
-\begin{frame}{9.1 CRE}
-  
-\end{frame}
-
-\begin{frame}{9.1 CRE}
-  
-\end{frame}
-
 
 
 % =========================
