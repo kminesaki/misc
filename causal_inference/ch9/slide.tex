@@ -1,0 +1,171 @@
+\documentclass[aspectratio=169, 12pt]{beamer}
+
+% --- Language and Fonts ---
+\usepackage{fontspec}
+\usepackage[english]{babel}
+\usepackage{amsmath, amssymb, bm}
+% tikz
+\usepackage{tikz}
+\usetikzlibrary{shapes, arrows.meta, positioning, shadows, calc}
+
+% --- Bibliography (BibTeX + natbib) ---
+\usepackage{natbib}
+\bibliographystyle{chicago} 
+
+% =========================================
+% ===== keybox ====================
+% =========================================
+\usepackage[most]{tcolorbox}
+\newtcolorbox{keybox}[1]{
+  enhanced,
+  colback=headbg!4,
+  colframe=headbg,
+  coltitle=headfg,
+  colbacktitle=headbg,
+  title=#1,
+  fonttitle=\bfseries,
+  boxrule=0.8pt,
+  arc=1.5mm,
+  left=2mm,
+  right=2mm,
+  top=1mm,
+  bottom=1mm,
+  before skip=0.2cm,
+  after skip=0.2cm
+}
+
+\usepackage{booktabs}
+
+% =========================================
+% ===== Custom Footline (Page Number) =====
+% =========================================
+
+
+\setbeamercolor{footline}{fg=headbg}
+\setbeamerfont{footline}{size=\scriptsize}
+
+\setbeamertemplate{footline}{%
+  \hfill%
+  \usebeamercolor[fg]{footline}%
+  \usebeamerfont{footline}%
+  \insertframenumber\,/\,\inserttotalframenumber\kern1em\vskip3pt%
+}
+
+\setbeamertemplate{navigation symbols}{}
+
+\usetheme{default}
+\usepackage{xcolor}
+
+\definecolor{headbg}{RGB}{30, 60, 120}
+\definecolor{headfg}{RGB}{255, 255, 255}
+\definecolor{accent}{RGB}{200, 50, 50}
+
+\setbeamercolor{headline}{bg=headbg, fg=headfg}
+\setbeamercolor{section in head/foot}{bg=headbg, fg=headfg}
+\setbeamercolor{subsection in head/foot}{bg=headbg!80, fg=headfg}
+\setbeamercolor{frametitle}{bg=headbg, fg=headfg}
+
+% Step indicator command
+\newcommand{\stepindicator}[1]{%
+  \hfill {\scriptsize \textit{\textcolor{headbg}{Step #1 / 6}}}%
+}
+\DeclareMathOperator*{\argmin}{arg\,min}
+
+\usepackage{hyperref}
+
+
+% --- Title ---
+\title[]{A First Course in Causal Inference Ch.~9}
+\author[Kodai Minesaki]{Kodai Minesaki}
+\institute[Faculty of Engineering, The University of Tokyo]{Faculty of Engineering, The University of Tokyo}
+\date{\today}
+
+\begin{document}
+
+% --- Title Slide ---
+\begin{frame}
+\titlepage
+\end{frame}
+
+
+\begin{frame}
+
+  {
+    \large
+    Ch.~9 Bridging Finite and Super Population Causal Inference
+  }
+  
+\end{frame}
+
+\begin{frame}{Ch.~9 Bridging Finite and Super Population Causal Inference}
+  \begin{keybox}{Definition~9.1 internal validity}
+    The statistical analysis is valid for the study samples at hand.
+  \end{keybox}
+  \begin{keybox}{Definition~9.2 external validity}
+    The statistical analysis is valid for a broader population beyond the study samples. 
+  \end{keybox}
+  \begin{itemize}
+    \item Do finite population results generalize to a bigger population?
+    \item The external validity of the results depends on the sampling process of the units
+    \begin{itemize}
+      \item If the finite population represents a sample of a larger population, the results also have external validity.
+    \end{itemize}
+    \item The results based on randomization inference may not generalize; it ensures only internal validity. 
+  \end{itemize}
+  
+\end{frame}
+
+\begin{frame}{Ch.~9 Bridging Finite and Super Population}
+  To rigorously discuss this issue, we introduce a frmework with two levels of randomness:
+  \begin{itemize}
+    \item Randomness due to the sampling process of the units;
+    \item Randomness due to the random assignment of the treatment.
+  \end{itemize}
+  Actually, this framework does not really solve the problem mentioned above, but it is beneficial for the following two purposes:
+  \begin{itemize}
+    \item it gives a different perspective on randomized experiments;
+    \item it serves as a bridge between experimental studies and observational studies.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{9.1 CRE}
+  
+\end{frame}
+
+\begin{frame}{9.1 CRE}
+  
+\end{frame}
+
+\begin{frame}{9.1 CRE}
+  
+\end{frame}
+
+\begin{frame}{9.1 CRE}
+  
+\end{frame}
+
+\begin{frame}{9.1 CRE}
+  
+\end{frame}
+
+\begin{frame}{9.1 CRE}
+  
+\end{frame}
+
+\begin{frame}{9.1 CRE}
+  
+\end{frame}
+
+
+
+% =========================
+
+% =========================
+\section{}
+\begin{frame}[allowframebreaks, noframenumbering]{References}
+  \beamerdefaultoverlayspecification{}
+  \small
+  \bibliography{../references}
+\end{frame}
+
+\end{document}
