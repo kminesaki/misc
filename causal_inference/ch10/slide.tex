@@ -1,0 +1,237 @@
+\documentclass[aspectratio=169, 12pt]{beamer}
+
+% --- Language and Fonts ---
+\usepackage{fontspec}
+\usepackage[english]{babel}
+\usepackage{amsmath, amssymb, bm}
+% tikz
+\usepackage{tikz}
+\usetikzlibrary{shapes, arrows.meta, positioning, shadows, calc}
+
+% --- Bibliography (BibTeX + natbib) ---
+\usepackage{natbib}
+\bibliographystyle{chicago} 
+
+% =========================================
+% ===== keybox ====================
+% =========================================
+\usepackage[most]{tcolorbox}
+\newtcolorbox{keybox}[1]{
+  enhanced,
+  colback=headbg!4,
+  colframe=headbg,
+  coltitle=headfg,
+  colbacktitle=headbg,
+  title=#1,
+  fonttitle=\bfseries,
+  boxrule=0.8pt,
+  arc=1.5mm,
+  left=2mm,
+  right=2mm,
+  top=1mm,
+  bottom=1mm,
+  before skip=0.2cm,
+  after skip=0.2cm
+}
+
+\usepackage{booktabs}
+
+% =========================================
+% ===== Custom Footline (Page Number) =====
+% =========================================
+
+
+\setbeamercolor{footline}{fg=headbg}
+\setbeamerfont{footline}{size=\scriptsize}
+
+\setbeamertemplate{footline}{%
+  \hfill%
+  \usebeamercolor[fg]{footline}%
+  \usebeamerfont{footline}%
+  \insertframenumber\,/\,\inserttotalframenumber\kern1em\vskip3pt%
+}
+
+\setbeamertemplate{navigation symbols}{}
+
+\usetheme{default}
+\usepackage{xcolor}
+
+\definecolor{headbg}{RGB}{30, 60, 120}
+\definecolor{headfg}{RGB}{255, 255, 255}
+\definecolor{accent}{RGB}{200, 50, 50}
+
+\setbeamercolor{headline}{bg=headbg, fg=headfg}
+\setbeamercolor{section in head/foot}{bg=headbg, fg=headfg}
+\setbeamercolor{subsection in head/foot}{bg=headbg!80, fg=headfg}
+\setbeamercolor{frametitle}{bg=headbg, fg=headfg}
+
+% Step indicator command
+\newcommand{\stepindicator}[1]{%
+  \hfill {\scriptsize \textit{\textcolor{headbg}{Step #1 / 6}}}%
+}
+\DeclareMathOperator*{\argmin}{arg\,min}
+
+\usepackage{hyperref}
+
+
+% --- Title ---
+\title[]{A First Course in Causal Inference Ch.~10}
+\author[Kodai Minesaki]{Kodai Minesaki}
+\institute[Faculty of Engineering, The University of Tokyo]{Faculty of Engineering, The University of Tokyo}
+\date{\today}
+
+\begin{document}
+
+% --- Title Slide ---
+\begin{frame}
+\titlepage
+\end{frame}
+
+
+\begin{frame}
+
+  {
+    \large
+    Ch.~10 Observational Studies, Selection Bias, and Nonparametric Identification of Causal Effects
+  }
+  
+\end{frame}
+
+\begin{frame}{Ch.~10 Observational Studies, Selection Bias, and Nonparametric Identification of Causal Effects}
+  \citet{cochran1965planning} summarized two commonn characteristics of observational studies:
+  \begin{enumerate}
+    \item the objective is to elucidate cause-and-effect relationships;
+    \item it is not feasible to use controlled experimentation.
+  \end{enumerate}
+  \begin{itemize}
+    \item This part will discuss causal inference with observational studies.
+    \item Many ideas of causal inference with observational studies are deeply connected to those with randomized experiments.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{10.2 Causal effects and selection bias under the potential outcomes framework}
+  \begin{itemize}
+    \item For unit $i$ $(i=1,\dots,n)$, we have pretreatment covariates $X_i$, a binary treatment indicator $Z_i$, and an observed outcome $Y$ with two potential outcomes $Y_i(1)$ and $Y_i(0)$.
+    \item We assume $\{X_i,Z_i,Y_i(1),Y_i(0)\}_{i=1}^n\overset{\text{i.i.d.}}{\sim}\{X,Z,Y(1),Y(0)\}.$
+    \item The causal effects of interest are the average causal effect $\tau=\mathbb{E}[Y(1)-Y(0)]$, the average causal effect on the treated units $\tau_T=\mathbb{E}[Y(1)-Y(0)\mid Z=1]$, and the average causal effect on the control units $\tau_C=\mathbb{E}[Y(1)-Y(0)\mid Z=0].$
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{10.2 Causal effects and selection bias under the potential outcomes framework}
+  Rewrite the average causal effects on the treated units and control units:
+  \[
+  \tau_T=\mathbb{E}[Y(1)\mid Z=1]-\mathbb{E}[Y(0)\mid Z=1]=\underbrace{\mathbb{E}[Y\mid Z=1]}_{\text{observable}}-\underbrace{\mathbb{E}[Y(0)\mid Z=1]}_{\text{unobservable}}.
+  \]
+  \[
+  \tau_C=\mathbb{E}[Y(1)\mid Z=0]-\mathbb{E}[Y(0)\mid Z=0]=\underbrace{\mathbb{E}[Y(1)\mid Z=0]}_{\text{unobservable}}-\underbrace{\mathbb{E}[Y\mid Z=0]}_{\text{observable}}.
+  \]
+  These unobservable terms are \textit{counterfactuals}.
+\end{frame}
+
+
+\begin{frame}{10.2 Causal effects and selection bias under the potential outcomes framework}
+  \begin{itemize}
+    \item The simple difference in means, known as the \textit{prima fucie} causal effect
+    \[
+    \tau_{\text{PF}}=\mathbb{E}[Y\mid Z=1]-\mathbb{E}[Y\mid Z=0]=\mathbb{E}[Y(1)\mid Z=1]-\mathbb{E}[Y(0)\mid Z=0]
+    \]
+    is generally biased for the causal effects defined above.
+    \item For example, $\tau_{\text{PF}}-\tau_T=\mathbb{E}[Y(0)\mid Z=1]-\mathbb{E}[Y(0)\mid Z=0]$ is not zero in general.
+    \item The equation above quantifies \textit{selection bias}.
+    \item The reason why randomization matters is because the \textit{selection bias} term is zero.
+    \item Under the CRE, $\tau_{\text{PF}}=\tau_T=\tau_C=\tau$.
+    \item The fundamental benefit of randomization is to balance the distributions of the potential outcomes across the groups.
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}{10.3 Sufficient conditions for nonparametric identification of causal effects}
+  \begin{itemize}
+    \item Causal inference with observational studies is challenging and it relis on strong assumptions.
+    \item A strategy is to use the information from the pretreatment covariates and assume that conditioning on observed covariates $X$, the selection bias terms are zero.
+    {\small\[
+    \mathbb{E}[Y(0)\mid Z=1,X]=\mathbb{E}[Y(0)\mid Z=0,X],\quad \mathbb{E}[Y(1)\mid Z=1,X]=\mathbb{E}[Y(1)\mid Z=0,X]
+    \]}
+    \item This assumption states that the differences in the means of the potential outcomes across the treatment and control groups are entirely due to the difference in the observed covariates.
+    \item The average causal effect $\tau$ is nonparametrically identifiable under this assumption.
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}{10.3 Sufficient conditions for nonparametric identification of causal effects}
+  \begin{keybox}{Definition~10.1 (identification)}
+    A parameter $\theta$ is identifiable if it can be writte as a function of the distribution of the observed data under certain model assumptions. A parameter $\theta$ is nonparametrically identifiable if it can be written as a function of the distribution of the observed data without any parametric model assumptions.
+  \end{keybox}
+  \begin{itemize}
+    \item This assumption is fundamental in causal inference with observational studies.
+    \item The parameter of interest $\tau=\mathbb{E}[Y(1)-Y(0)]$ depends on some unobserved random variables, so it is unclear whether it is nonparametrically identifiable based on observed data.
+    \item Because $\tau_{\text{PF}}$ depends only on the observables, it is nonparametrically identified by definition.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{10.3 Sufficient conditions for nonparametric identification of causal effects}
+  \begin{keybox}{Theorem~10.1}
+    Under the assumption, the average causal effect $\tau$ is identified by
+    \begin{align*}
+      \tau &=\mathbb{E}[\tau(X)]\\
+      &= \mathbb{E}[\mathbb{E}[Y\mid Z=1,X]]-\mathbb{E}[Y\mid Z=0,X]\\
+      &= \int \{\mathbb{E}[Y\mid Z=1,X=x]-\mathbb{E}[Y\mid Z=0,X]\}f(x)dx
+    \end{align*}
+  \end{keybox}
+\end{frame}
+
+\begin{frame}{10.3 Sufficient conditions for nonparametric identification of causal effects}
+  Usually we impose the strong assumption:
+  \begin{keybox}{Assumption~10.1 (ignorability)}
+    We have $Y(z)\perp\!\!\!\perp Z\mid X\quad (z=0,1)$.
+  \end{keybox}
+  \begin{keybox}{Assumption~10.2 (strong ignorability)}
+    We have $\{Y(1),Y(0)\}\perp\!\!\!\perp  Z \mid X$.
+  \end{keybox}
+  These assumptions are not necesarry for identifying $\tau$ but they cannot be relaced if the parameter of interest is the causal effects on other scales.
+\end{frame}
+
+\begin{frame}{10.3 Sufficient conditions for nonparametric identification of causal effects}
+  \begin{itemize}
+    \item The ignorability assumption canbe reasonable if we observe a rich set of covariates $X$ that affect the treatment and the outcome simultaneously.
+    \item It is fundamentally untestable.
+    \item We may justify it based on the scientific background knowledge but we are often not sure whether it holds or not.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{10.4 Two simple estimation strategies and their limitations}
+  
+\end{frame}
+
+\begin{frame}{10.4 Two simple estimation strategies and their limitations}
+  
+\end{frame}
+
+\begin{frame}{10.4 Two simple estimation strategies and their limitations}
+  
+\end{frame}
+
+\begin{frame}{10.4 Two simple estimation strategies and their limitations}
+  
+\end{frame}
+
+\begin{frame}{10.4 Two simple estimation strategies and their limitations}
+  
+\end{frame}
+
+\begin{frame}{10.4 Two simple estimation strategies and their limitations}
+  
+\end{frame}
+
+
+% =========================
+
+% =========================
+\section{}
+\begin{frame}[allowframebreaks, noframenumbering]{References}
+  \beamerdefaultoverlayspecification{}
+  \small
+  \bibliography{../references}
+\end{frame}
+
+\end{document}
