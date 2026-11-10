@@ -193,34 +193,68 @@
 
 \begin{frame}{10.3 Sufficient conditions for nonparametric identification of causal effects}
   \begin{itemize}
-    \item The ignorability assumption canbe reasonable if we observe a rich set of covariates $X$ that affect the treatment and the outcome simultaneously.
+    \item Intuitively, the assumption rules out all unmeasured covariates that affect the treatment and outcome simultaneously.
+    \item The ignorability assumption can be reasonable if we observe a rich set of covariates $X$ that affect the treatment and the outcome simultaneously.
     \item It is fundamentally untestable.
     \item We may justify it based on the scientific background knowledge but we are often not sure whether it holds or not.
   \end{itemize}
 \end{frame}
 
 \begin{frame}{10.4 Two simple estimation strategies and their limitations}
-  
+  \begin{itemize}
+    \item If the covariate $X_i\in\{1,\dots,K\}$ is discrete then the ignorability assumption reads as $Y(z)\perp\!\!\!\perp Z\mid X=k$. 
+    \item Therefore, we can use the estimator $\hat{\tau}=\sum_{k=1}^{K}\pi_{[k]}\{\hat{\bar{Y}}(1)-\hat{\bar{Y}}(0)\},$ where $\pi_{[k]}$ denotes a propensity score.
+    \item This method is widely used but there are several problems: 
+    \item First, it works well for small $K$, but it leads to the poorly defines $\hat{\tau}_{[k]}$ for large $K$ because some strata are very likely to have $n{[k]1}=0$ or $n_{[k]1}=0$.
+    \item Second, it is not obvious how to apply this stratification method to multidimensional continuous or mixed covariates $X$.
+  \end{itemize}
 \end{frame}
 
 \begin{frame}{10.4 Two simple estimation strategies and their limitations}
-  
+  \begin{itemize}
+    \item The most commonly used method is to run the OLS with an additive model of the observed outcome on the treatment indicator and covariates: $\mathbb{E}[Y\mid Z,X]=\beta_0+\beta_zZ+\beta_x^{\top}X$.
+    \item If the linear model is correct, then we have \[\tau(X)=\mathbb{E}[Y\mid Z=1,X]-\mathbb{E}[Y\mid Z=0,X]=\beta_z.\]
+    \item This estimator implies that the causal effect is homogeneous with respect to the covariates.
+    \item Thie, coupled with ignorability, implies that $\tau=\mathbb{E}[\tau(X)]=\beta_z$.
+    \item If ignorability holdes and the outcome model is linear, then the average causal effect equals the coeff. of $Z$.
+    \item At the same time, this is valid only under two strong assumptions: \textit{ignorability} and \textit{the linear model}.
+  \end{itemize}
 \end{frame}
 
 \begin{frame}{10.4 Two simple estimation strategies and their limitations}
-  
+  \begin{itemize}
+    \item If we incorporate heterogenous causal effects, we include theinteraction term:
+    \[
+    \mathbb{E}[Y\mid Z,X] = \beta_0+\beta_zZ+\beta_x^{\top}X+\beta_{zx}^{\top}XZ.
+    \]
+    \item We then have
+    \[
+    \tau(X) = \mathbb{E}[Y\mid Z=1,X] - \mathbb{E}[Y\mid Z=0,X] = \beta_z+\beta_{zx}^{\top}X.
+    \]
+    \item With ignorability, it implies that 
+    \[
+    \tau = \mathbb{E}[\tau(X)] = \mathbb{E}[\beta_z+\beta_{zx}^{\top}X] = \beta_z + \beta_{zx}^{\top}\mathbb{E}[X].
+    \]
+    \item The estimator for $\tau$ is then $\hat{\beta}_z + \hat{\beta}_{zx}^{\top}\bar{X}.$
+  \end{itemize}
 \end{frame}
 
 \begin{frame}{10.4 Two simple estimation strategies and their limitations}
-  
+  \begin{itemize}
+    \item If we center the covariates to ensure $\bar{X}=0$, then the estimator is simpli the regression coeff. of $Z$.
+    \item In general, we can use other more complex models to estimate the causal effects.
+    \item If we build two predictors $\hat{\mu}_1(X)$ and $\hat{\mu}_0(X)$ based on the treated and control data, respectively. 
+    \item Then we have an estimator for CATE: $\hat{\tau}(X)=\hat{\mu}_1(X)-\hat{\mu}_0(X)$, and an estimator for ATE: $\hat{\tau}^{\text{reg}}=n^{-1}\sum_{i=1}^{n}\{\hat{\mu}_1(X)-\hat{\mu}_0(X)\}.$
+    \item It is sometimes called the \textit{outcome regression} estimator.
+  \end{itemize}
 \end{frame}
 
 \begin{frame}{10.4 Two simple estimation strategies and their limitations}
-  
-\end{frame}
-
-\begin{frame}{10.4 Two simple estimation strategies and their limitations}
-  
+  \begin{itemize}
+    \item The biggest problem with the above approach based on outcome regressions is its sensitivity to the specification of the outcome model.
+    \item Researchers migh report their favorable causal effects estimates after searching over a wide set of candidate models, without confessing the model searching process.
+    \item This is a major source of $p$-hacking in causal inference.
+  \end{itemize}
 \end{frame}
 
 
