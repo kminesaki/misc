@@ -1,0 +1,236 @@
+\documentclass[aspectratio=169, 12pt]{beamer}
+
+% --- Language and Fonts ---
+\usepackage{fontspec}
+\usepackage[english]{babel}
+\usepackage{amsmath, amssymb, bm}
+% tikz
+\usepackage{tikz}
+\usetikzlibrary{shapes, arrows.meta, positioning, shadows, calc}
+
+% --- Bibliography (BibTeX + natbib) ---
+\usepackage{natbib}
+\bibliographystyle{chicago} 
+
+% =========================================
+% ===== keybox ====================
+% =========================================
+\usepackage[most]{tcolorbox}
+\newtcolorbox{keybox}[1]{
+  enhanced,
+  colback=headbg!4,
+  colframe=headbg,
+  coltitle=headfg,
+  colbacktitle=headbg,
+  title=#1,
+  fonttitle=\bfseries,
+  boxrule=0.8pt,
+  arc=1.5mm,
+  left=2mm,
+  right=2mm,
+  top=1mm,
+  bottom=1mm,
+  before skip=0.2cm,
+  after skip=0.2cm
+}
+
+\usepackage{booktabs}
+
+% =========================================
+% ===== Custom Footline (Page Number) =====
+% =========================================
+
+
+\setbeamercolor{footline}{fg=headbg}
+\setbeamerfont{footline}{size=\scriptsize}
+
+\setbeamertemplate{footline}{%
+  \hfill%
+  \usebeamercolor[fg]{footline}%
+  \usebeamerfont{footline}%
+  \insertframenumber\,/\,\inserttotalframenumber\kern1em\vskip3pt%
+}
+
+\setbeamertemplate{navigation symbols}{}
+
+\usetheme{default}
+\usepackage{xcolor}
+
+\definecolor{headbg}{RGB}{30, 60, 120}
+\definecolor{headfg}{RGB}{255, 255, 255}
+\definecolor{accent}{RGB}{200, 50, 50}
+
+\setbeamercolor{headline}{bg=headbg, fg=headfg}
+\setbeamercolor{section in head/foot}{bg=headbg, fg=headfg}
+\setbeamercolor{subsection in head/foot}{bg=headbg!80, fg=headfg}
+\setbeamercolor{frametitle}{bg=headbg, fg=headfg}
+
+% Step indicator command
+\newcommand{\stepindicator}[1]{%
+  \hfill {\scriptsize \textit{\textcolor{headbg}{Step #1 / 6}}}%
+}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\newcommand{\indep}{\perp\!\!\!\perp}
+
+\usepackage{hyperref}
+
+
+% --- Title ---
+\title[]{A First Course in Causal Inference Ch.~11}
+\author[Kodai Minesaki]{Kodai Minesaki}
+\institute[Faculty of Engineering, The University of Tokyo]{Faculty of Engineering, The University of Tokyo}
+\date{\today}
+
+\begin{document}
+
+% --- Title Slide ---
+\begin{frame}
+\titlepage
+\end{frame}
+
+
+\begin{frame}
+
+  {
+    \large
+    Ch.~11 The Central Role of the Propensity Score in Observational Studies for Causal Effects
+  }
+  
+\end{frame}
+
+\begin{frame}{Ch.~11 The Central Role of the Propensity Score in Observational Studies for Causal Effects}
+  \begin{itemize}
+    \item \citet{rosenbaum1983central} proposed the key concept \textit{propensity score}.
+    \item Under the i.i.d. sampling assumption, we have four random variables associated with each unit: $\{X,Z,Y(1),Y(0)\}$. 
+    \item We can factorize the joint distribution as
+    \[
+    \Pr\{X,Z,Y(1),Y(0)\} = \Pr\{X\}\cdot\Pr\{Y(1),Y(0)\mid X\}\cdot\Pr\{Z\mid X,Y(1),Y(0)\}.
+    \]
+    \item We do not want to model the covariates becasue they are background information happening before the treatment and outcome. 
+    \item If we want to go beyond the outcome model, then we must focus on the treatment assignment mechanism, which leads to the definition of the propensity score.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \begin{center}
+    \begin{keybox}{Definition~11.1 (propensity score)}
+     Define 
+     \[
+     e(X,Y(1),Y(0))=\Pr\{Z=1\mid X,Y(1),Y(0)\}
+     \] 
+     as the propensity score. Under strong ignorability, we have 
+     \[
+     e(X,Y(1),Y(0))=\Pr\{Z=1\mid X,Y(1),Y(0)\} = \Pr(Z=1\mid X),
+     \] 
+     so the propensity score reduces to 
+     \[
+     e(X)=\Pr\{Z=1\mid X\},
+     \]
+     the conditional probability of receriving the treatment given the observed covariates.
+  \end{keybox}
+  \end{center}
+\end{frame}
+
+\begin{frame}{11.1 The propensity score as a dimension reduction tool}
+  \begin{keybox}{Theorem~11.1}
+    $Z\indep \{Y(1),Y(0)\}\mid X\Rightarrow Z\indep\{Y(1),Y(0)\mid e(X)\}.$
+  \end{keybox}
+  \begin{itemize}
+    \item Thm.~11.1 implies that conditioning on the propensity score $e(X)$ removes all confunding induced by covariates $X$.
+    \item The original covariates $X$ can be high-dimensional but $e(X)$ is one-dimensional scalar variable bounded between $0$ and $1$. 
+    \item Therefore, the propensity score reduces the dimension of the original covariates but still maintains the ignorability: a \textit{dimensional reduction tool}.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{11.1 The propensity score as a dimension reduction tool}
+  \footnotesize
+  \begin{proof}
+    We need to show 
+    \[
+    \Pr\{Z=1\mid Y(1),Y(0),e(X)\} = \Pr\{Z=1\mid e(X)\}.
+    \]
+    The left-hand side of the equation equals:
+    \begin{align*}
+      \quad\Pr\{Z=1\mid Y(1),Y(0),e(X)\} 
+      &= \mathbb{E}[Z\mid Y(1),Y(0),e(X)] \\
+      &=\mathbb{E}[\mathbb{E}[Z\mid Y(1),Y(0),e(X),X]\mid Y(1),Y(0),e(X)]\quad (\because \text{LIE.})\\
+      &= \mathbb{E}[\underbrace{\mathbb{E}[Z\mid X]}_{=e(X)}\mid Y(1),Y(0),e(X)]= e(X).
+    \end{align*}
+    The right-hand side of the equation equals:
+    \begin{align*}
+      \Pr\{Z=1\mid e(X)\}
+      &= \mathbb{E}[Z\mid e(X)]
+      = \mathbb{E}[\mathbb{E}[Z\mid e(X),X]\mid e(X)]\quad (\because \text{LIE.})= \mathbb{E}[\underbrace{\mathbb{E}[Z\mid X]}_{=e(X)}\mid e(X)]=e(X)
+    \end{align*}
+  \end{proof}
+\end{frame}
+
+\begin{frame}{11.1 The propensity score as a dimension reduction tool}
+  \begin{itemize}
+    \item Thm.~11.1 motivaes \textit{propensity score stratification}:
+    \[
+    Z\indep\{Y(1),Y(0)\}\mid e(X)=e_k\quad (k=1,\dots,K),
+    \]
+    where the propensity score only takes $K$ posible values $\{e_1,\dots,e_K\}.$
+    \item In general, the propensity score is not known and is not discrete. 
+    \item We often fit a statistical model for $\Pr\{Z=1\mid X\}$ to obtain $\hat{e}(X)$ and we can discretize it to approximate the simple case above.
+    \item For example, we can discretize $\hat{e}(X)$ by its $K$ quantiles to obtain $\hat{e}'(X)$: $\hat{e}'(X)=e_k$, the $k/K$-th quantile of $\hat{e}(X)$, if $\hat{e}(X)$ is between the $(k-1)/K$-th and $k/K$-th quantitles of the $\hat{e}(X)$'s.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{11.1 The propensity score as a dimension reduction tool}
+  \begin{itemize}
+    \item Its rigorous quantification is still missing in the literature.
+    \item Q1: How do we choose $K$?
+    \begin{enumerate}
+      \item If $K$ is too small, ignorability does not hold conditional on $\hat{e}'(X)$ even approximately.
+      \item If $K$ is too large, then we do not have enough units within each stratum of the estimated propensity score and many strata have only treated or control units.
+    \end{enumerate}
+    \item Q2: How do we compute standard errors of the estimators based on propensity score stratification?
+    \begin{enumerate}
+      \item Reporting standard errors based on the SRE ignores the uncertainty in the estimated propensity scores.
+      \item Some researchers employ the bootstrap method but the theory for the bootstrap is still unclear due to the discreteness of this estimator.
+    \end{enumerate}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{11.2 Propensity score weighting}
+  
+\end{frame}
+
+\begin{frame}{11.2 Propensity score weighting}
+  
+\end{frame}
+
+\begin{frame}{11.2 Propensity score weighting}
+  
+\end{frame}
+
+\begin{frame}{11.2 Propensity score weighting}
+  
+\end{frame}
+
+\begin{frame}{11.2 Propensity score weighting}
+  
+\end{frame}
+
+\begin{frame}{11.2 Propensity score weighting}
+  
+\end{frame}
+
+\begin{frame}{11.2 Propensity score weighting}
+  
+\end{frame}
+
+
+% =========================
+
+% =========================
+\section{}
+\begin{frame}[allowframebreaks, noframenumbering]{References}
+  \beamerdefaultoverlayspecification{}
+  \small
+  \bibliography{../references}
+\end{frame}
+
+\end{document}
