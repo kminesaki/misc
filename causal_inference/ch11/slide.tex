@@ -71,6 +71,8 @@
 }
 \DeclareMathOperator*{\argmin}{arg\,min}
 \newcommand{\indep}{\perp\!\!\!\perp}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Var}{\operatorname{Var}}
 
 \usepackage{hyperref}
 
@@ -195,33 +197,148 @@
 \end{frame}
 
 \begin{frame}{11.2 Propensity score weighting}
-  
+  \begin{keybox}{Theorem~11.2}
+    If $Z\indep \{Y(1),Y(0)\}\mid X$ and $0<e(X)<1$, then 
+    \[
+    \mathbb{E}[Y(1)]=\mathbb{E}\left[\frac{ZY}{e(X)}\right],\quad \mathbb{E}[Y(0)] = \mathbb{E}\left[\frac{(1-Z)Y}{1-e(X)}\right].
+    \]
+  \end{keybox}
+  \begin{itemize}
+    \item The additional assumption $0<e(X)<1$ is called \textit{overlap} or \textit{positivity} condition.
+    \item If $e(X)=1$ or $e(X)=0$, Thm.~11.2 is not well defined.
+    \item Moreover, if $e(X_i)=1$, then it implies that a potential outcome $Y_i(0)$ does not exist, leading to a philosophical issue of causal inference.
+    \item \citet{king2006dangers} called $Y_i(0)$ an \textit{extreme counterfactuals} when $e(X_i)=1$.
+  \end{itemize}
 \end{frame}
 
 \begin{frame}{11.2 Propensity score weighting}
   
+  \begin{proof}
+    \begin{align*}
+      \mathbb{E}\left[\frac{ZY}{e(X)}\right] 
+      &= \mathbb{E}\left[\frac{ZY(1)}{e(X)}\right] = \mathbb{E}\left[\mathbb{E}\left[\frac{ZY(1)}{e(X)}\mid X\right]\right]\quad (\because \text{LIE.})\\
+      &= \mathbb{E}\left[\frac{1}{e(X)}\mathbb{E}\left[ZY(1)\mid X\right]\right] \\
+      &= \mathbb{E}\left[\frac{1}{e(X)}Y(1)\underbrace{\mathbb{E}[Z\mid X]}_{=e(X)}\right]\quad (\because \text{strong ignorability.})\\
+      &= \mathbb{E}[Y(1)]
+    \end{align*}
+  \end{proof}
 \end{frame}
 
 \begin{frame}{11.2 Propensity score weighting}
-  
+  \begin{itemize}
+    \item Thm.~11.2 motivates the following moment estimator for the average causal effect:
+    \[
+    \hat{\tau}^{ht} = \frac{1}{n}\sum_{i=1}^{n}\frac{Z_iY_i}{\hat{e}(X_i)}-\frac{1}{n}\sum_{i=1}^{n}\frac{(1-Z_i)Y_i}{1-\hat{e}(X_i)}.
+    \]
+    \item Recall that it is ideal to estimate $\tau = \mathbb{E}[Y(1)-Y(0)]$, but $Y(1),Y(0)$ are not simultaneously observable (the fundamental problem of causal inference).
+    \item Thm.~11.2 enables us to estimate both $\E[Y(1)],\E[Y(0)]$.
+    \item This is the \textit{inverse propensity score weighting} (IPW) estimator, which is also called the Horvitz-Thompson (HT) estimator \citep{horvitz1952generalization}.
+    \item However, it is known that HT estimator has many problems.
+  \end{itemize}
 \end{frame}
 
 \begin{frame}{11.2 Propensity score weighting}
-  
+  \begin{keybox}{Proposition~11.1 (lack of invariance for the HT estimator)}
+    If we change $Y_i$ to $Y_i+c$ with a constant $c$, then the HT estimator $\hat{\tau}^{ht}$ becomes $\hat{\tau}^{ht}+c(\hat{1}_{T}-\hat{1}_C)$, where
+    \[
+    \hat{1}_T = \frac{1}{n}\sum_{i=1}^{n}\frac{Z_i}{\hat{e}(X_i)},\quad \hat{1}_C = \frac{1}{n}\sum_{i=1}^{n}\frac{(1-Z_i)}{1-\hat{e}(X_i)}
+    \]
+    can be viewed as two different estimates of the constant $1$.
+  \end{keybox}
+  \begin{itemize}
+    \item With the true propensity scores, both $\hat{1}_T$ and $\hat{1}_C$ have expectation $1$.
+    \item In general, $\hat{1}_{T}-\hat{1}_C$ is not $0$ in finite sample.
+  \end{itemize}
 \end{frame}
 
 \begin{frame}{11.2 Propensity score weighting}
-  
+  \small
+  \begin{proof}
+    We first prove Prop.~11.1. Substituting $Y_i+c$,
+    \[
+    \frac{1}{n}\sum_{i=1}^{n}\frac{Z_i(Y_i+c)}{\hat{e}(X_i)} - \frac{1}{n}\sum_{i=1}^{n}\frac{(1-Z_i)(Y_i+c)}{1-\hat{e}(X_i)} = \hat{\tau}^{ht} + c\left(\underbrace{\frac{1}{n}\sum_{i=1}^{n}\frac{Z_i}{\hat{e}(X_i)}}_{=\hat{1}_T} - \underbrace{\frac{1}{n}\sum_{i=1}^{n}\frac{1-Z_i}{1-\hat{e}(X_i)}}_{=\hat{1}_C}\right).
+    \]
+    We then prove that $\hat{1}_T$ has expectation $1$ with the true propensity score.
+    \[
+    \E[\hat{1}_T] = \frac{1}{n}\sum_{i=1}^{n}\E\left[\frac{Z_i}{e(X_i)}\right] = \frac{1}{n}\sum_{i=1}^{n}\E\left[\E\left[\frac{Z_i}{e(X_i)}\mid X_i\right]\right] = \frac{1}{n}\sum_{i=1}^{n}\E\left[\frac{1}{e(X_i)}\underbrace{\E\left[Z_i\mid X_i\right]}_{=e(X_i)}\right]=1.
+    \]
+  \end{proof}
 \end{frame}
 
 \begin{frame}{11.2 Propensity score weighting}
-  
+  \begin{itemize}
+    \item \citet{hajek1971comment} proposed a Hajek estimator:
+    \[
+    \hat{\tau}^{\text{hajek}} = \frac{\sum_{i=1}^{n}\frac{Z_iY_i}{\hat{e}(X_i)}}{\sum_{i=1}^{n}\frac{Z_i}{\hat{e}(X_i)}} - \frac{\frac{\sum_{i=1}^{n}(1-Z_i)Y_i}{1-\hat{e}(X_i)}}{\sum_{i=1}^{n}\frac{1-Z_i}{1-\hat{e}(X_i)}}.
+    \]
+    \item We can verify that if we replace $Y_i$ by $Y_i+c$, then $\hat{\tau}^{\text{hajek}}$ remains the same.
+    \item Many numerical studeis have found that $\hat{\tau}^{\text{hajek}}$ is much more stable than $\hat{\tau}^{ht}$ in finite samples.
+  \end{itemize}
 \end{frame}
 
 \begin{frame}{11.2 Propensity score weighting}
-  
+  \begin{itemize}
+    \item Many asymptotic analyses require a \textit{strong overlap} condition: 
+    \[
+    0<\alpha_L\leq e(X)\leq\alpha_U<1,
+    \]
+    that is, the true propensity score is bounded away from $0$ and $1.$
+    \item This is a rather strong assumption, especially with many covariates.
+    \item Even if this condition holds with the true propensity score, the estimated propensity score can be close to $0$ or $1$.
+    \item When this happens, the weighting estimators blow up to infinity, which results in extremely unstable behavior in finite samples.
+  \end{itemize}
 \end{frame}
 
+\begin{frame}{11.2 Propensity score weighting}
+  \begin{itemize}
+    \item We can either truncate the estimated propensity score by changing it to 
+    \[
+    \max\left[\alpha_L,\min\left\{\hat{e}(X_i),\alpha_U\right\}\right],
+    \]
+    or trim the observations by dropping units with $\hat{e}(X_i)$ outside the interval $[\alpha_L,\alpha_U]$.
+    \item Although trimming often stabilizes the IPW estimators, it also injects additional arbitrariness into the procedure.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{11.3 The balancing property of the propensity score}
+  \begin{keybox}{Theorem~11.3}
+    The propensity score satisfies $Z\indep X\mid e(X)$. Moreover, for any function $h(\cdot)$, we have
+    \[
+    \E\left[\frac{Zh(X)}{e(X)}\right]=\E\left[\frac{(1-Z)h(X)}{1-e(X)}\right]
+    \]
+    provided the existence of the moments on both sides of the inequality.
+  \end{keybox}
+  \begin{itemize}
+    \item Thm.~11.3 does not require the ignorability assumption.
+    \item The first part of Thm.~11.3 states that the covariate distributions are balanced across the treatment and control groups, within the same level of the propensity score.
+    \item The second part of Thm.~11.3 states that an equivalent form of covariate balance based on the weighting form.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{11.3 The balancing property of the propensity score}
+  \small
+  \begin{proof}
+    \begin{enumerate}
+      \item The first statement is equivalent to $\Pr\{Z=1\mid X,e(X)\}=\Pr\{Z=1\mid e(X)\}.$ Then, the left-hand side is
+      \[
+      \Pr\{Z=1\mid X,e(X)\} = \Pr\{Z=1\mid X\}=e(X),
+      \]
+      because $e(X)$ is a function of $X$ so conditioning on $X$ and $e(X)$ is same to conditioning on $X$. The right-hand side is
+      \begin{align*}
+        \Pr\{Z=1\mid e(X)\} &= \E[\E[Z=1\mid X,e(X)]\mid e(X)] = \E[\E[Z\mid X]\mid e(X)]\\&= \E[e(X)\mid e(X)] = e(X).
+      \end{align*}
+      \item By LIE, we obtain the second part. 
+    \end{enumerate}
+  \end{proof}
+\end{frame}
+
+\begin{frame}{11.3 The balancing property of the propensity score}
+  \begin{itemize}
+    \item Thm.~11.3 has useful implications for the statistical analysis: before getting access to the outcome data, we can check whether the propensity score model is specified well enough to ensure the covariate balance in the data.
+    \item In propensity score weighting, we can view $h(X)$ as a pseudo outcome and estimate the average causal effect on $h(X)$. 
+    \item Because the true average causal effect on $H(X)$ is $0$, the estimate should not be significantly different from $0$. A canonical choice of $h(X)$ is $X$.
+  \end{itemize}
+\end{frame}
 
 % =========================
 

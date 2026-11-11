@@ -1,8 +1,30 @@
 \begin{thebibliography}{}
 
-\bibitem[\protect\citeauthoryear{Rosenbaum and Rubin}{Rosenbaum and Rubin}{1983}]{rosenbaum1983central}
+\bibitem[\protect\citeauthoryear{H{\'a}jek}{H{\'a}jek}{1971}]{hajek1971comment}
+H{\'a}jek, J. (1971).
+\newblock Comment on “an essay on the logical foundations of survey sampling,
+  part one”.
+\newblock {\em The foundations of survey sampling\/}~{\em 236}.
+
+\bibitem[\protect\citeauthoryear{Horvitz and Thompson}{Horvitz and
+  Thompson}{1952}]{horvitz1952generalization}
+Horvitz, D.~G. and D.~J. Thompson (1952).
+\newblock A generalization of sampling without replacement from a finite
+  universe.
+\newblock {\em Journal of the American statistical Association\/}~{\em
+  47\/}(260), 663--685.
+
+\bibitem[\protect\citeauthoryear{King and Zeng}{King and
+  Zeng}{2006}]{king2006dangers}
+King, G. and L.~Zeng (2006).
+\newblock The dangers of extreme counterfactuals.
+\newblock {\em Political analysis\/}~{\em 14\/}(2), 131--159.
+
+\bibitem[\protect\citeauthoryear{Rosenbaum and Rubin}{Rosenbaum and
+  Rubin}{1983}]{rosenbaum1983central}
 Rosenbaum, P.~R. and D.~B. Rubin (1983).
-\newblock The central role of the propensity score in observational studies for causal effects.
+\newblock The central role of the propensity score in observational studies for
+  causal effects.
 \newblock {\em Biometrika\/}~{\em 70\/}(1), 41--55.
 
 \end{thebibliography}
