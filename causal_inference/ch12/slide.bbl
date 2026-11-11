@@ -1,13 +1,17 @@
 \begin{thebibliography}{}
 
-\bibitem[\protect\citeauthoryear{Bang and Robins}{Bang and Robins}{2005}]{bang2005doubly}
+\bibitem[\protect\citeauthoryear{Bang and Robins}{Bang and
+  Robins}{2005}]{bang2005doubly}
 Bang, H. and J.~M. Robins (2005).
 \newblock Doubly robust estimation in missing data and causal inference models.
 \newblock {\em Biometrics\/}~{\em 61\/}(4), 962--973.
 
-\bibitem[\protect\citeauthoryear{Scharfstein, Rotnitzky, and Robins}{Scharfstein et~al.}{1999}]{scharfstein1999adjusting}
+\bibitem[\protect\citeauthoryear{Scharfstein, Rotnitzky, and
+  Robins}{Scharfstein et~al.}{1999}]{scharfstein1999adjusting}
 Scharfstein, D.~O., A.~Rotnitzky, and J.~M. Robins (1999).
-\newblock Adjusting for nonignorable drop-out using semiparametric nonresponse models.
-\newblock {\em Journal of the American Statistical Association\/}~{\em 94\/}(448), 1096--1120.
+\newblock Adjusting for nonignorable drop-out using semiparametric nonresponse
+  models.
+\newblock {\em Journal of the American Statistical Association\/}~{\em
+  94\/}(448), 1096--1120.
 
 \end{thebibliography}
