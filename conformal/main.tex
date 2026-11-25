@@ -62,7 +62,7 @@
 % Title information
 % --------------------
 
-\title{Conformal Prediction\thanks{This document is based on my lecture notes for \href{https://catalog.he.u-tokyo.ac.jp/detail?code=0704162-01&year=2026}{Advanced
+\title{Introductiono to Conformal Prediction\thanks{This document is based on my lecture notes for \href{https://catalog.he.u-tokyo.ac.jp/detail?code=0704162-01&year=2026}{Advanced
 Mathematical Statistics I} at the University of Tokyo in the A1 term of 2026, with additional explanations and clarifications. All errors are my own.}}
 \author{Kodai Minesaki\thanks{Faculty of Engineering, The University of Tokyo}}
 \date{
@@ -73,6 +73,8 @@ Mathematical Statistics I} at the University of Tokyo in the A1 term of 2026, wi
 \begin{document}
 
 \maketitle
+
+\section*{Introduction}
 
 The aim of \emph{conformal prediction} is to construct a distribution-free prediction region. A prediction region that relies on distributional assumptions requires knowledge of the data-generating process. Conformal prediction, in contrast, constructs a prediction region with valid coverage without any such knowledge, apart from the assumption that the data are exchangeable. This makes it a general-purpose method for constructing prediction regions. There are two main variants, \emph{full conformal prediction} and \emph{split conformal prediction}. In short, full conformal prediction uses all of the data both to fit the model and to calibrate the prediction region. Split conformal prediction instead divides the data into two parts. It fits the model on one part (the training data) and calibrates the prediction region on the other part (the test data). The resulting region is then used for new test points. In this section, we first introduce the mathematical background of conformal prediction and then describe full conformal prediction and split conformal prediction in turn.
 
@@ -173,7 +175,7 @@ Let $W_1,\dots,W_n\in\mathcal{X}\subset\mathbb{R}$ with $\mathcal{X}=\{x_1,\dots
     \label{eq:ch8-005}
 \end{equation}
 
-If $\mathcal{X}$ has fewer than $n$ elements, that is, if $x_i=x_j$ for some $i\neq j$, then the rank statistics defined in Eq.~\eqref{eq:ch8-005} have ties. Ties cause a problem in conformal prediction, where we seek to construct a ``distribution-free'' prediction set. If ties can occur, the distribution of $\{\operatorname{rank}^*(W_i;\mathcal{X})\}_{i\in[n]}$ depends on the distribution of $(W_1,\dots,W_n)$, so the uniformity of the ranks no longer holds. For example, suppose $W_i\iid \operatorname{Bernoulli}(p)$ for $i=1,\dots,n$. Then $\mathcal{X}=\{0,1\}$ and $\#\{i\in[100]:W_i=1\}/100$ depends on $p$, because this rank statistics depends on the probability of getting heads ($p$), and hence it depends on the distribution of $W_i$. We then define rank statistics differently to avoid ties. 
+If $\mathcal{X}$ has fewer than $n$ elements, that is, if $x_i=x_j$ for some $i\neq j$, then the rank statistics defined in Eq.~\eqref{eq:ch8-005} have ties. Ties cause a problem in conformal prediction, where we seek to construct a ``distribution-free'' prediction region. If ties can occur, the distribution of $\{\operatorname{rank}^*(W_i;\mathcal{X})\}_{i\in[n]}$ depends on the distribution of $(W_1,\dots,W_n)$, so the uniformity of the ranks no longer holds. For example, suppose $W_i\iid \operatorname{Bernoulli}(p)$ for $i=1,\dots,n$. Then $\mathcal{X}=\{0,1\}$ and $\#\{i\in[100]:W_i=1\}/100$ depends on $p$, because this rank statistics depends on the probability of getting heads ($p$), and hence it depends on the distribution of $W_i$. We then define rank statistics differently to avoid ties. 
 
 \begin{definition}[Randomized rank]
 \label{definition:ch8-08}
@@ -549,5 +551,11 @@ where $\hat{\varepsilon}_i=Y_i-\hat{\mu}_A(X_i)$ and $K_h(\cdot)=K(\cdot/h)$ for
 \end{figure}
 
 Figure~\ref{fig:ch8-split-conformal-prediction} illustrates the difference in the \emph{adaptivity} of the prediction regions. Without $\hat{\sigma}_A$, the prediction region has a constant width regardless of $x$ (left figure). With $\hat{\sigma}_A$, the width of the prediction region varies with $x$ (right figure). This shows that incorporating $\hat{\sigma}_A$ enables us to construct a prediction region that adapts to the heteroscedasticity of the data. More generally, accounting for heteroscedasticity is important not only in split conformal prediction but also in nonparametric regression.
+
+\section*{Furthur Reading}
+\begin{itemize}
+    \item Angelopoulos, A. N., \& Bates, S. (2023). Conformal prediction: A gentle introduction. Foundations and Trends in Machine Learning, 16(4), 494-591. \href{https://arxiv.org/abs/2107.07511}{[arxiv]}
+    \item Angelopoulos, A. N., Barber, R. F., \& Bates, S. (2024). Theoretical foundations of conformal prediction. arXiv preprint arXiv:2411.11824. \href{https://arxiv.org/abs/2411.11824}{[arxiv]}
+\end{itemize}
 
 \end{document}
