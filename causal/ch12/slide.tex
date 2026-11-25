@@ -1,0 +1,249 @@
+\documentclass[aspectratio=169, 12pt]{beamer}
+
+% --- Language and Fonts ---
+\usepackage{fontspec}
+\usepackage[english]{babel}
+\usepackage{amsmath, amssymb, bm}
+% tikz
+\usepackage{tikz}
+\usetikzlibrary{shapes, arrows.meta, positioning, shadows, calc}
+
+% --- Bibliography (BibTeX + natbib) ---
+\usepackage{natbib}
+\bibliographystyle{chicago} 
+
+% =========================================
+% ===== keybox ====================
+% =========================================
+\usepackage[most]{tcolorbox}
+\newtcolorbox{keybox}[1]{
+  enhanced,
+  colback=headbg!4,
+  colframe=headbg,
+  coltitle=headfg,
+  colbacktitle=headbg,
+  title=#1,
+  fonttitle=\bfseries,
+  boxrule=0.8pt,
+  arc=1.5mm,
+  left=2mm,
+  right=2mm,
+  top=1mm,
+  bottom=1mm,
+  before skip=0.2cm,
+  after skip=0.2cm
+}
+
+\usepackage{booktabs}
+
+% =========================================
+% ===== Custom Footline (Page Number) =====
+% =========================================
+
+
+\setbeamercolor{footline}{fg=headbg}
+\setbeamerfont{footline}{size=\scriptsize}
+
+\setbeamertemplate{footline}{%
+  \hfill%
+  \usebeamercolor[fg]{footline}%
+  \usebeamerfont{footline}%
+  \insertframenumber\,/\,\inserttotalframenumber\kern1em\vskip3pt%
+}
+
+\setbeamertemplate{navigation symbols}{}
+
+\usetheme{default}
+\usepackage{xcolor}
+
+\definecolor{headbg}{RGB}{30, 60, 120}
+\definecolor{headfg}{RGB}{255, 255, 255}
+\definecolor{accent}{RGB}{200, 50, 50}
+
+\setbeamercolor{headline}{bg=headbg, fg=headfg}
+\setbeamercolor{section in head/foot}{bg=headbg, fg=headfg}
+\setbeamercolor{subsection in head/foot}{bg=headbg!80, fg=headfg}
+\setbeamercolor{frametitle}{bg=headbg, fg=headfg}
+
+% Step indicator command
+\newcommand{\stepindicator}[1]{%
+  \hfill {\scriptsize \textit{\textcolor{headbg}{Step #1 / 6}}}%
+}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\newcommand{\indep}{\perp\!\!\!\perp}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Var}{\operatorname{Var}}
+
+\usepackage{hyperref}
+
+
+% --- Title ---
+\title[]{A First Course in Causal Inference Ch.~11}
+\author[Kodai Minesaki]{Kodai Minesaki}
+\institute[Faculty of Engineering, The University of Tokyo]{Faculty of Engineering, The University of Tokyo}
+\date{\today}
+
+\begin{document}
+
+% --- Title Slide ---
+\begin{frame}
+\titlepage
+\end{frame}
+
+
+\begin{frame}
+
+  {
+    \large
+    Ch.~12 The Doubly Robust or the Augmented Inverse Propensity Score Weighting Estimator for the Average Causal Effect
+  }
+  
+\end{frame}
+
+\begin{frame}{Ch.~12 The Doubly Robust or the Augmented Inverse Propensity Score Weighting Estimator for the Average Causal Effect}
+  \begin{keybox}{Assumption~12.0}
+    Ignorability $Z\indep\{Y(1),Y(0)\}\mid X$ and overlap $0<e(X)<1$.
+  \end{keybox}
+  Under Assum.~12.0, we have two identification formula of the average causal effect $\tau=\E[Y(1)-Y(0)].$ First, the outcome regression formula is
+  \begin{equation}
+    \tau =\E[\mu_1(X)]-\E[\mu_0(X)],
+    \label{eq:outcome-reg}
+  \end{equation}
+  where,
+  \begin{gather*}
+    \mu_1(X) = \E[Y(1)\mid X] = \E[Y\mid Z=1,X]\\
+    \mu_0(X) = \E[Y(0)\mid X] = \E[Y\mid Z=0,X].
+  \end{gather*}
+\end{frame}
+
+\begin{frame}
+  Second, the IPW formula is
+  \begin{equation}
+    \tau = \E\left[\frac{ZY}{e(X)}\right] - \E\left[\frac{(1-Z)Y}{1-e(X)}\right],
+    \label{eq:ipw}
+  \end{equation}
+  where $e(X)=\E[Z=1\mid X]$.
+  Eq.~\eqref{eq:outcome-reg} is consistent if the outcome model is correctly specified, and Eq.~\eqref{eq:ipw} is consistent if the propensity score model is correctly specified.
+  \begin{itemize}
+    \item What if one of them is not correctly specified?
+    \item We are then motivated to propose an estimator that is consistent if either of them is correctly specified.
+    \item It is called the \textit{doubly robust} estimator \citep{scharfstein1999adjusting,bang2005doubly}.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{12.1 The doubly robust estimator}
+  \begin{itemize}
+    \item We posit a model for the conditional means of the outcome $\mu_1(X,\beta_1),\mu_0(X,\beta_0)$, with parameters $\beta_1,\beta_0$.
+    \item If the outcome model is corectly specified, then $\mu_1(X)=\mu_1(X,\beta_1)$ and $\mu_0(X)=\mu_0(X,\beta_0)$.
+    \item We posit a model for the propensity score $e(X,\alpha)$, with a parameter $\alpha$.
+    \item If the propensity score model is correctly specified, then $e(X)=e(X,\alpha)$.
+    \item In practice, both models may be misspecified.
+    \item Sometimes, we call them \textit{working models} due to the possibility of misspecification.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{12.1 The doubly robust estimator}
+  Define
+  \begin{gather}
+    \tilde{\mu}_1^{\text{dr}} = \E\left[\frac{Z\{Y-\mu_1(X,\beta_1)\}}{e(X,\alpha)}+\mu_1(X,\beta_1)\right],\label{eq:dr-outcome-1}\\
+    \tilde{\mu}_0^{\text{dr}} = \E\left[\frac{(1-Z)\{Y-\mu_0(X,\beta_0)\}}{1-e(X,\alpha)}+\mu_0(X,\beta_0)\right],\label{eq:dr-outcome-0}
+  \end{gather}
+  which can be written as
+  \begin{gather}
+    \tilde{\mu}_1^{\text{dr}} = \E\left[\frac{ZY}{e(X,\alpha)}-\frac{Z-e(X,\alpha)}{e(X,\alpha)}\mu_1(X,\beta_1)\right],\label{eq:dr-ipw-1}\\
+    \tilde{\mu}_0^{\text{dr}} = \E\left[\frac{(1-Z)Y}{1-e(X,\alpha)}-\frac{e(X,\alpha)-Z}{1-e(X,\alpha)}\mu(X,\beta_0)\right].\label{eq:dr-ipw-0}
+  \end{gather}
+\end{frame}
+
+\begin{frame}{12.1 The doubly robust estimator}
+  \begin{itemize}
+    \item Eq.~\eqref{eq:dr-outcome-1},~\eqref{eq:dr-outcome-0} augment the outcome regression estimator by inverse propensity score weighting terms of the residuals ($Y-\mu_Z(X,\beta_Z)$).
+    \item Eq.~\eqref{eq:dr-ipw-1},~\eqref{eq:dr-ipw-0} augment the IPW estimator by the imputed outcomes.
+    \item For this reason, the doubly robust estimator is also called the \textit{augmented inverse propensity score weighting} (AIPW) estimator.
+    \item The augmentation strengthens the theoretical properties in the following sense.
+  \end{itemize}
+  \begin{keybox}{Theorem~12.1}
+    Assume ignorability $Z\indep \{Y(1),Y(0)\}\mid X$ and overlap $0<e(X)<1$. 
+    \begin{enumerate}
+      \item If either $e(X,\alpha)=e(X)$ or $\mu_1(X,\beta_1)=\mu_1(X)$, then $\tilde{\mu}_1^{\text{dr}}=\E[Y(1)]$.
+      \item If either $e(X,\alpha)=e(X)$ or $\mu_0(X,\beta_1)=\mu_0(X)$, then $\tilde{\mu}_0^{\text{dr}}=\E[Y(0)]$.
+      \item If either $e(X,\alpha)=e(X)$ or $\{\mu_1(X,\beta_1)=\mu_1(X),\mu_0(X,\beta_1)=\mu_0(X)\}$, then $\tilde{\mu}_1^{\text{dr}} - \tilde{\mu}_0^{\text{dr}} = \tau.$
+    \end{enumerate}
+  \end{keybox}
+\end{frame}
+
+\begin{frame}{12.1 The doubly robust estimator}
+  \begin{itemize}
+    \item By Thm.~12.1, \textbf{if either the propensity score model or the outcome model is correctly specified,} $\tilde{\mu}_1^{\text{dr}} - \tilde{\mu}_0^{\text{dr}} = \tau.$
+  \end{itemize}
+  \small
+  \begin{proof}
+  \vspace{-3mm}
+    \begin{align*}
+      \tilde{\mu}_1^{\text{dr}} - \E[Y(1)]
+      &= \E\left[\frac{Z\{Y(1)-\mu_1(X,\beta_1)\}}{e(X,\alpha)}+\mu_1(X,\beta_1) - Y(1)\right]\\
+      &= \E\left[\frac{Z-e(X,\alpha)}{e(X,\alpha)}(Y(1)-\mu_1(X,\beta_1))\right]\\
+      &= \E\left[\E\left[\frac{Z-e(X,\alpha)}{e(X,\alpha)}(Y(1)-\mu_1(X,\beta_1))\mid X\right]\right]\quad (\because \text{LIE})\\
+      &= \E\left[\E\left[\frac{Z-e(X,\alpha)}{e(X,\alpha)}\mid X\right]\times \E\left[Y(1)-\mu_1(X,\beta_1)\mid X\right]\right]\quad (\because\text{strong ignorability})\\
+      &= \E\left[\frac{e(X)-e(X,\alpha)}{e(X,\alpha)}\times \{\mu_1(X)-\mu_1(X,\alpha)\}\right].
+    \end{align*}
+  \end{proof}
+\end{frame}
+
+\begin{frame}{12.1 The doubly robust estimator}
+  We can obtain their sample analogs to construct a doubly robust estimator for $\tau$.
+  
+  \begin{keybox}{12.1~Definition (doubly robust estimator for the average causal effect)}
+    Based on the data $(X_1,Z_i,Y_i)_{i=1}^n$, we can obtain a doubly robust estimator for $\tau$ by the following steps:
+    \begin{enumerate}
+      \item obtain the fitted values of the propensity scores: $e(X_i,\hat{\alpha})$;
+      \item obtain the fitted values of the outcome means: $\mu_1(X_i,\hat{\beta}_1),\mu_0(X_i,\hat{\beta}_0)$;
+      \item construct the doubly robust estimator: $\hat{\tau}^{dr}=\hat{\mu}_1^{\text{dr}}-\hat{\mu}_0^{\text{dr}}$, where
+      \begin{gather*}
+        \hat{\mu}_1^{\text{dr}} = \frac{1}{n}\sum_{i=1}^{n}\left[\frac{Z_i\{Y_i-\mu_1(X_i,\hat{\beta}_1)\}}{e(X_i,\hat{\alpha})} + \mu_1(X_i,\hat{\beta}_1)\right],\\
+        \hat{\mu}_0^{\text{dr}} = \frac{1}{n}\sum_{i=1}^{n}\left[\frac{(1-Z_i)\{Y_i-\mu_0(X_i,\hat{\beta}_0)\}}{1-e(X_i,\hat{\alpha})} + \mu_0(X_i,\hat{\beta}_0)\right]
+      \end{gather*}
+    \end{enumerate}
+  \end{keybox}
+\end{frame}
+
+\begin{frame}{12.1 The doubly robust estimator}
+  By definition, we can also write the doubly robust estimator as:
+  \[
+  \hat{\tau}^{\text{dr}} = \hat{\tau}^{\text{reg}} + \frac{1}{n}\sum_{i=1}^{n}\frac{Z_i\{Y_i-\mu_1(X_i,\hat{\beta}_1)\}}{e(X,\hat{\alpha})} - \frac{1}{n}\sum_{i=1}^{n}\frac{(1-Z_i)\{Y_i-\mu_0(X_i,\hat{\beta}_0)\}}{1-e(X_i,\hat{\alpha})}.
+  \]
+  We can also rewrite it as
+  \[
+  \hat{\tau}^{\text{dr}} = \hat{\tau}^{\text{ipw}} - \frac{1}{n}\sum_{i=1}^{n}\frac{Z_i-e(X_i,\hat{\alpha})}{e(X_i,\hat{\alpha})}\mu_1(X_i,\hat{\beta}_1) + \frac{1}{n}\sum_{i=1}^{n}\frac{e(X_i,\hat{\alpha})-Z_i}{1-e(X_i,\hat{\alpha})}\mu_0(X_i,\hat{\beta}_0).
+  \]
+\end{frame}
+
+\begin{frame}{12.2 More intuition and theory for the doubly robust estimator}
+  The IPW estimator for $\mu_1$ based on $\mu_1 = \E\left[ZY/e(X)\right]$ completely ignores the outcome model of $Y$. With possibly misspecified outcome model $\mu_1(X,\beta_1)$,
+  \[
+  \mu_1 =\E[Y(1)] = \E[Y(1)-\mu_1(X,\beta_1)] + \E[\mu_1(X,\beta_1)].
+  \]
+  If we apply the IPW formula to the first term in the above formula:
+  \[
+  \mu_1= \E\left[\frac{Z(Y(1)-\mu_1(X,\beta_1))}{e(X)}\right] + \E[\mu_1(X,\beta_1)] = \E\left[\frac{Z(Y(1)-\mu_1(X,\beta_1))}{e(X)}+\mu_1(X,\beta_1)\right],
+  \]
+  which holds if the propensity core model correct without assuming that the outcome model is correct. 
+\end{frame}
+
+\begin{frame}{Future Reading}
+  \begin{itemize}
+    \item Chernozhukov, V., Chetverikov, D., Demirer, M., Duflo, E., Hansen, C., Newey, W., \& Robins, J. (2018). Double/debiased machine learning for treatment and structural parameters. \url{https://academic.oup.com/ectj/article/21/1/C1/5056401}
+  \end{itemize}
+\end{frame}
+
+% =========================
+
+% =========================
+\section{}
+\begin{frame}[allowframebreaks, noframenumbering]{References}
+  \beamerdefaultoverlayspecification{}
+  \small
+  \bibliography{../references}
+\end{frame}
+
+\end{document}

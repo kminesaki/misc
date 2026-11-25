@@ -1,0 +1,517 @@
+\documentclass[aspectratio=169, 12pt]{beamer}
+
+% --- Language and Fonts ---
+\usepackage{fontspec}
+\usepackage[english]{babel}
+\usepackage{amsmath, amssymb, bm}
+% tikz
+\usepackage{tikz}
+\usetikzlibrary{shapes, arrows.meta, positioning, shadows, calc}
+
+% --- Bibliography (BibTeX + natbib) ---
+\usepackage{natbib}
+\bibliographystyle{chicago} 
+
+% =========================================
+% ===== keybox ====================
+% =========================================
+\usepackage[most]{tcolorbox}
+\newtcolorbox{keybox}[1]{
+  enhanced,
+  colback=headbg!4,
+  colframe=headbg,
+  coltitle=headfg,
+  colbacktitle=headbg,
+  title=#1,
+  fonttitle=\bfseries,
+  boxrule=0.8pt,
+  arc=1.5mm,
+  left=2mm,
+  right=2mm,
+  top=1mm,
+  bottom=1mm,
+  before skip=0.2cm,
+  after skip=0.2cm
+}
+
+\usepackage{booktabs}
+
+% =========================================
+% ===== Custom Footline (Page Number) =====
+% =========================================
+
+
+\setbeamercolor{footline}{fg=headbg}
+\setbeamerfont{footline}{size=\scriptsize}
+
+\setbeamertemplate{footline}{%
+  \hfill%
+  \usebeamercolor[fg]{footline}%
+  \usebeamerfont{footline}%
+  \insertframenumber\,/\,\inserttotalframenumber\kern1em\vskip3pt%
+}
+
+\setbeamertemplate{navigation symbols}{}
+
+\usetheme{default}
+\usepackage{xcolor}
+
+\definecolor{headbg}{RGB}{30, 60, 120}
+\definecolor{headfg}{RGB}{255, 255, 255}
+\definecolor{accent}{RGB}{200, 50, 50}
+
+\setbeamercolor{headline}{bg=headbg, fg=headfg}
+\setbeamercolor{section in head/foot}{bg=headbg, fg=headfg}
+\setbeamercolor{subsection in head/foot}{bg=headbg!80, fg=headfg}
+\setbeamercolor{frametitle}{bg=headbg, fg=headfg}
+
+% Step indicator command
+\newcommand{\stepindicator}[1]{%
+  \hfill {\scriptsize \textit{\textcolor{headbg}{Step #1 / 6}}}%
+}
+\DeclareMathOperator*{\argmin}{arg\,min}
+
+\usepackage{hyperref}
+
+
+% --- Title ---
+\title[]{A First Course in Causal Inference Ch.5}
+\author[Kodai Minesaki]{Kodai Minesaki}
+\institute[Faculty of Engineering, The University of Tokyo]{Faculty of Engineering, The University of Tokyo}
+\date{\today}
+
+\begin{document}
+
+% --- Title Slide ---
+\begin{frame}
+\titlepage
+\end{frame}
+
+
+\begin{frame}
+
+  {
+    \large
+    Ch.5 Stratification and Post-Stratification in Randomized Experiments
+  }
+  
+\end{frame}
+
+\begin{frame}{Ch.5 Stratification and Post-Stratification in Randomized Experiments}
+  This chapter explains the meaning of the following quote:
+  \begin{quotation}
+    Block what you can and randomize what you cannot. \\
+    -- \ \citet{box1978statistics}
+  \end{quotation}
+\end{frame}
+
+\begin{frame}{5.1 Stratification}
+  \begin{itemize}
+    \item A CRE may generate an undesired treatment allocation by chane. 
+    \item Setup: a CRE wuth a discrete covariate $X_i\in \{1,\dots,K\}$; define $n_{[k]}=\# \{i:X_i=k\}$ and $\pi_{[k]}=n_{[k]}/n$ as the number and proportion of units in stratum $k$ ($k=1,\dots,K$).
+    \item Then, $n_{[k]1}=\#\{i:X_i=k,Z_i=1\}$ and $n_{[k]0}=\#\{i:X_i=k,Z_i=0\}$.
+    \item With positive probability, $n_{[k]1}$ or $n_{[k]0}$ is zero for some $k$: \textbf{it is possible that some strata only have treated or control units.}
+    \item So, the proportions of units in stratum $k$ are different across the treatment and control groups although on average their difference is zero:
+    \begin{equation}
+      \mathbb{E}\left[\frac{n_{[k]1}}{n_1}-\frac{n_{[k]0}}{n_0}\right]=0.
+      \label{eq:stratification}
+    \end{equation}
+   \end{itemize}
+\end{frame}
+
+\begin{frame}{5.1 Stratification}
+  Proof for Eq.~\eqref{eq:stratification}. \\
+  We also write $n_{[k]1}$ and $n_{[k]0}$ as $n_{[k]1}=\sum_{i:X_i=k}^{}Z_i$ and $n_{[k]0}=\sum_{i:X_i=k}^{}(1-Z_i)$, respectively. We then obtain
+  \[
+  \mathbb{E}\left[\frac{n_{[k]1}}{n_1}\right]=\frac{1}{n_1}\mathbb{E}[n_{[k]1}] = \frac{1}{n_1}\mathbb{E}\left[\sum_{i:X_i=k}^{}Z_i\right]=\frac{1}{n_1}\sum_{i:X_i=k}^{}\mathbb{E}[Z_i] = \frac{1}{n_1}n_{[k]}\frac{n_1}{n} = \frac{n_{[k]}}{n}.
+  \]
+  Similarly, 
+  \[
+  \mathbb{E}\left[\frac{n_{[k]0}}{n_0}\right] = \frac{n_{[k]}}{n}.
+  \]
+  Hence, $\mathbb{E}\left[\dfrac{n_{[k]1}}{n_1}-\dfrac{n_{[k]0}}{n_0}\right]=0. \quad \Box$
+  
+\end{frame}
+
+\begin{frame}{5.1 Stratification}
+  \begin{itemize}
+    \item When $\dfrac{n_{[k]1}}{n_1}-\dfrac{n_{[k]0}}{n_0}$ is large for some strata $k$'s, the threatment and control groups have undesirable covariate imbalance.
+    \item In an extreme example, suppose $k=2$ and $n=8$, $n_1=4$, $n_0=4$, $n_{[1]}=4$, and $n_{[2]}=4$. There exists a case $n_{[1]1}=4$, $n_{[1]0}=0$, $n_{[2]1}=0$, and $n_{[2]0}=4$. Here there is undesirebale covariate imbalance amongst both groups. 
+    \item To avoid such covariate imbalance in experiments, we introduce \textit{stratified randomized experiments} (SRE).
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{5.1 Stratification}
+  \begin{keybox}{Definition 5.1 (SRE)}
+    Fix the $n_{[k]1}$'s or $n_{[k]0}$'s. We conduct $K$ independent CREs within the $K$ strata of a discrete covariate $X$.
+  \end{keybox}
+  \begin{itemize}
+    \item The total number of randamizations in an SRE equals 
+    \[
+    \prod_{k=1}^{K}\begin{pmatrix}
+      n_{[k]} \\ n_{[k]1}
+    \end{pmatrix},
+    \]
+    and each feasible randomization has equal probability.
+    \item Within stratum $k$, the proportion of units receiving the treatment is 
+    \[
+    e_{[k]}=\frac{n_{[k]1}}{n_{[k]}},
+    \]
+    which is also called the \textit{propensity score}.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{5.1 Stratification}
+  An SRE is different from a CRE:
+  \begin{enumerate}
+    \item \[\prod_{k=1}^{K}\begin{pmatrix}
+      n_{[k]}\\n_{[k]1}
+    \end{pmatrix}<\begin{pmatrix}
+      n\\n_1
+    \end{pmatrix}.\]
+    \begin{itemize}
+      \item In the previous example, in a CRE the number of allocation is $\begin{pmatrix}
+        8\\4
+      \end{pmatrix}=70$ while that of allocation is $\begin{pmatrix}
+        4\\2
+      \end{pmatrix}\begin{pmatrix}
+        4\\2
+      \end{pmatrix}=36$. Hence $70>36.$
+    \end{itemize}
+    \item $e_{[k]}$ is fixed in an SRE but random in a CRE
+    \begin{itemize}
+      \item It says the excatly same thing to the previous illustration.
+    \end{itemize}
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{5.1 Stratification}
+  \begin{itemize}
+    \item For stratum $k$, we have the stratum-specific average causal effect
+    \[
+    \tau_{[k]} = \frac{1}{n_{[k]}}\sum_{X_i=k}^{}\tau_i.
+    \]
+    \item The average causal effect is\footnote{The third equality follows from the equation above: $\sum_{X_i=k}^{}\tau_i=n_{[k]}\tau_{[k]}$.}
+    \[
+    \tau = \frac{1}{n}\sum_{i=1}^{n}\tau_i = \frac{1}{n}\sum_{k=1}^{K}\sum_{X_i=k}^{}\tau_i=\frac{1}{n}\sum_{k=1}^{K}n_{[k]}\tau_{[k]}=\sum_{k=1}^{K}\frac{n_{[k]}}{n}\tau_{[k]}=\sum_{k=1}^{K}\pi_{[k]}\tau_{[k]}.
+    \]
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{5.2 FRT}
+  \begin{itemize}
+    \item The FRT in an SRE.
+    \item The sharp null hypothesis: $H_{0F}:Y_i(1)=Y_i(0)\text{ for all units }i=1,\dots,n.$
+    \item Following the Def.~5.1, when we simulate the treatment vector, we must permute the treatment indicators within strata of $X$.
+    \item We should choose test statistics that can reflect the nature of the SRE.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{5.2 FRT}
+  Example~5.1 Stratified estimator.\\
+  {
+
+    Motivated by estimating $\tau$, we can use the following stratified estimator in the FRT:
+    \[
+    \widehat{\tau}_S=\sum_{k=1}^{K}\pi_{[k]}\widehat{\tau}_{[k]},
+    \]
+    where
+    \[
+    \widehat{\tau}_{[k]} = \frac{1}{n_{[k]1}}\sum_{i=1}^{n}\mathbb{I}(X_i=k,Z_i=1)Y_i - \frac{1}{n_{[k]0}}\sum_{i=1}^{n}\mathbb{I}(X_i=k,Z_i=0)Y_i
+    \]
+    is the staratum-specific difference-in-means within stratum $k$.
+  }
+\end{frame}
+
+\begin{frame}{5.2 FRT}
+  Example~5.2 Studentized stratified estimator.\\
+
+  Motivated by the studentized statistic in the simple two-sample problem, we can use the following studentized statistic for the stratified estimator in the FRT:
+  \[
+  t_S = \frac{\widehat{\tau}_S}{\sqrt{\widehat{V}_S}},
+  \]
+  with
+  \[
+  \widehat{V}_S=\sum_{k=1}^{K}\pi_{[k]}^2\left(\frac{\widehat{S}_{[k]}^2(1)}{n_{[k]1}}+\frac{\widehat{S}_{[k]}^2(0)}{n_{[k]0}}\right)
+  \]
+  where $\widehat{S}_{[k]}^2(1)$ and $\widehat{S}_{[k]}^2(0)$ are the stratum-specific sample variances of the outcomes under the treatment and control, respectively.
+\end{frame}
+
+\begin{frame}{5.2 FRT}
+  Example~5.3 Combining Wilcoxon rank-sum statistics.\\
+  We first compute the Wilcoxon rank sum statistic $W_{[k]}$\footnote{\scriptsize Recall the Wilcoxon rank sum statistic is defined as $W=\sum_{i=1}^{n}Z_iR_i$, where $R_i=\#\{j:Y_j\leq Y_i\}$.} within stratum $k$ and then combine them as 
+  \[
+  W_S = \sum_{k=1}^{K}c_{[k]}W_{[k]}.
+  \]
+  For $c_{[k]}$, there are two proposed methods:
+  \begin{gather*}
+    c_{[k]}=\frac{1}{n_{[k]1}n_{[k]0}},\\
+    c_{[k]}=\frac{1}{n_{[k]}+1}.
+  \end{gather*}
+\end{frame}
+
+\begin{frame}{5.2 FRT}
+  Example~5.4 \citet{hodges2011rank}'s aligned rank statistics.\\
+  \citet{hodges2011rank} proposed a test statistic that make more comparisons across strata after standardizing the outcomes. First,
+  \[
+  \widetilde{Y}_i=Y_i-\overline{Y}_{[k]}
+  \]
+  with $\overline{Y}_{[k]}=\dfrac{1}{n_{[k]}}\sum_{X_i=k}^{}Y_i$, then obtaining the ranks $(\widetilde{R}_1,\dots,\widetilde{R}_n)$ of the pooled outcomes $(\widetilde{Y}_1,\dots,\widetilde{Y}_n)$, and finally constructing the test statistic
+  \[
+  \widetilde{W} = \sum_{i=1}^{n}Z_i\widetilde{R}_i.
+  \]
+\end{frame}
+
+\begin{frame}{5.3 Neymanian inference}
+  \begin{itemize}
+    \item Statistical inference for an SRE builds on the fact that it essentially consists of $K$ independent CREs.
+    \item Within sratum $k$, the difference-in-means $\widehat{\tau}_{[k]}$ is unbiased for $\tau_{[k]}$ with variances
+    \[
+    \operatorname{var}(\widehat{\tau}_{[k]}) = \frac{S_{[k]}^2(1)}{n_{[k]1}} + \frac{S_{[k]}^2(0)}{n_{[k]0}} - \frac{S_{[k]}^2(\tau)}{n_{[k]}}.
+    \]
+    \item Hence, the stratified estimator $\widehat{\tau}_S=\sum_{k=1}^{K}\pi_{[k]}\widehat{\tau}_{[k]}$ is unbiased for $\tau=\sum_{k=1}^{K}\pi_{[k]}\tau_{[k]}$ with variance $$\operatorname{var}(\widehat{\tau}_S)=\sum_{k=1}^{K}\pi_{[k]}^2\operatorname{var}(\widehat{\tau}_{[k]}).$$
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{5.3 Neymanian inference}
+  \begin{itemize}
+    \item Similarly, we obtain a conservative variance estimator
+    \[
+    \widehat{V}_S = \sum_{k=1}^{K}\pi_{[k]}^2\left(\frac{\widehat{S}_{[k]}^2(1)}{n_{[k]1}} + \frac{\widehat{S}_{[k]}^2(0)}{n_{[k]0}}\right),
+    \]
+    with sample variances of the outcomes $\widehat{S}_{[k]}^2(1)$ and $\widehat{S}_{[k]}^2(0)$.
+    \item We can also construct a Wald-type $1-\alpha$ CI for $\tau$ and $p$-values.
+    \item In short, \textbf{SRE is essentially $K$ independent CREs}.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{5.3 Neymanian inference}
+  \begin{itemize}
+    \item What are the benefits of the SRE compared with the CRE?
+    \item Benefits from the covariate balance in the SRE.
+    \item Better covariate balance results in better estimation precision of the average causal effect. 
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[label=neymanian]{5.3 Neymanian inference}
+  Assume that $e_{[k]} = e$ for all $k$. Then
+  \begin{equation}
+    \widehat{\tau} = \widehat{\tau}_S.
+    \label{eq:neymanian_inf}
+  \end{equation}
+  \vfill
+  \hfill\hyperlink{pf-neymanian<1>}{\beamergotobutton{Proof}}
+\end{frame}
+
+\begin{frame}[label=variances]{5.3 Neymanian inference}
+  To compare $\operatorname{var}_{CRE}(\widehat{\tau})$ and $\operatorname{var}_{SRE}(\widehat{\tau}_S)$, we first derive $S^2(1)$, $S^2(0)$ and $S^2(\tau)$. We then obtain
+  \[
+  \begin{aligned}
+    S^2(1)
+    &=\sum_{k=1}^{K}\left[
+      \frac{n_{[k]}-1}{n-1}S_{[k]}^2(1)+\frac{n_{[k]}}{n-1}\{\overline{Y}_{[k]}(1)-\overline{Y}(1)\}^2
+    \right],\\
+    S^2(0)
+    &=\sum_{k=1}^{K}\left[
+      \frac{n_{[k]}-1}{n-1}S_{[k]}^2(0)+\frac{n_{[k]}}{n-1}\{\overline{Y}_{[k]}(0)-\overline{Y}(0)\}^2
+    \right],\\
+    S^2(\tau)
+    &= \sum_{k=1}^{K}\left[
+      \frac{n_{[k]}-1}{n-1}S_{[k]}^2(\tau) + \frac{n_{[k]}}{n-1}\{\tau_{[k]}-\tau\}^2
+    \right].
+  \end{aligned}
+  \]
+  \vfill
+  \hfill\hyperlink{pf-variances<1>}{\beamergotobutton{Proof}}
+\end{frame}
+
+\begin{frame}{5.3 Neymanian inference}
+  Hence,
+  {\small
+  \begin{align*}
+    &\operatorname{var}_{CRE}(\widehat{\tau})\\
+    &= \frac{S^2(1)}{n_1} + \frac{S^2(0)}{n_0} - \frac{S^2(\tau)}{n}\\
+    &= \sum_{k=1}^{K}\left[
+      \frac{n_{[k]}-1}{(n-1)n_1}S_{[k]}^2(1) + \frac{n_{[k]}-1}{(n-1)n_0}S_{[k]}^2(0) - \frac{n_{[k]}-1}{(n-1)n}S_{[k]}^2(\tau)
+    \right]\\
+    &+ \sum_{k=1}^{K}\left[
+      \frac{n_{[k]}}{(n-1)n_1}\{\overline{Y}_{[k]}(1)-\overline{Y}(1)\}^2 + \frac{n_{[k]}}{(n-1)n_0}\{\overline{Y}_{[k]}(0)-\overline{Y}(0)\}^2 - \frac{n_{[k]}}{(n-1)n}\{\tau_{[k]}-\tau\}^2
+    \right]
+  \end{align*}}
+\end{frame}
+
+\begin{frame}{5.3 Neymanian inference}
+  With large $n_{[k]}$'s, $n_{[k]}-1\approx n_{[k]}$ and $n-1\approx n$ then
+  {\footnotesize
+    \begin{align*}
+  \operatorname{var}_{CRE}(\widehat{\tau}) 
+  &\approx \sum_{k=1}^{K}\left[\frac{\pi_{[k]}}{n_1}S_{[k]}^2(1)+\frac{\pi_{[k]}}{n_0}S^2_{[k]}(0)-\frac{\pi_{[k]}}{n}S_{[k]}^2(\tau)\right]\\
+  &+ \sum_{k=1}^{K}\left[\frac{\pi_{[k]}}{n_1}\{\overline{Y}_{[k]}(1)-\overline{Y}(1)\}^2+\frac{\pi_{[k]}}{n_0}\{\overline{Y}_{[k]}(0)-\overline{Y}(0)\}^2- \frac{\pi_{[k]}}{n}\{\tau_{[k]}-\tau\}^2\right].
+  \end{align*}}
+  Following the assumption $e_{[k]}=e$, we write $\operatorname{var}_{SRE}(\widehat{\tau})$ as
+  {\footnotesize
+    \begin{align*}
+    \operatorname{var}_{SRE}(\widehat{\tau}_S)
+    &= \sum_{k=1}^{K}\pi_{[k]}^2\left[
+      \frac{S_{[k]}^2(1)}{n_{[k]1}} + \frac{S_{[k]}^2(0)}{n_{[k]0}} - \frac{S_{[k]}^2(\tau)}{n_{[k]}}
+    \right]\\
+    &= \sum_{k=1}^{K}\left[
+      \frac{\pi_{[k]}}{n_1}S_{[k]}^2(1) + \frac{\pi_{[k]}}{n_0}S_{[k]}^2(0) - \frac{\pi_{[k]}}{n}S_{[k]}^2(\tau)
+    \right].
+  \end{align*}}
+\end{frame}
+
+\begin{frame}[label=cre_sre_diff]{5.3 Neymanian inference}
+  With large $n_{[k]}$'s, approximately, 
+  \begin{align}
+    &\operatorname{var}_{CRE}(\widehat{\tau}) - \operatorname{var}_{SRE}(\widehat{\tau}_S) \nonumber\\
+    &\approx \sum_{k=1}^{K}\left[\frac{\pi_{[k]}}{n_1}\{\overline{Y}_{[k]}(1)-\overline{Y}(1)\}^2+\frac{\pi_{[k]}}{n_0}\{\overline{Y}_{[k]}(0)-\overline{Y}(0)\}^2- \frac{\pi_{[k]}}{n}\{\tau_{[k]}-\tau\}^2\right] \nonumber\\
+    &\geq 0.
+    \label{eq:sre_var_diff}
+  \end{align}
+  The equality holds only in a case that for $k=1,\dots,K$,
+  \[
+  \sqrt{\frac{n_0}{n_1}}\{\overline{Y}_{[k]}(1)-\overline{Y}(1)\}^2 + \sqrt{\frac{n_1}{n_0}}\{\overline{Y}_{[k]}(0)-\overline{Y}(0)\} = 0.
+  \]
+
+  \vfill
+  \hfill\hyperlink{pf-sre_var_diff<1>}{\beamergotobutton{Proof}}
+\end{frame}
+
+\begin{frame}{5.3 Neymanian inference}
+    This result has several implications:
+
+  \begin{itemize}
+    \item An SRE is generally more efficient than a CRE, especially when the stratifying covariate is predictive of the potential outcomes.
+    \item In the extreme case where the stratifying covariate contains little information about the potential outcomes (that is, the potential outcomes are nearly the same across strata), an SRE provides little or no efficiency gain over a CRE.
+    \item This comparison relies on the large-strata approximation.
+    \item Therefore, the result does not necessarily hold in finite samples; in some cases, an SRE can even be less efficient than a CRE.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[label=cre_sre]{5.4 Post-stratification in a CRE}
+    Let $\bm{n}=\{n_{[k]1},n_{[k]0}\}_{k=1}^K$, then a CRE becomes an SRE, because 
+    \begin{equation}
+      \operatorname{pr}_{CRE}(\bm{Z}=\bm{z}\mid \bm{n}) = \frac{\operatorname{pr}_{CRE}(\bm{Z}=\bm{z},\bm{n})}{\operatorname{pr}_{CRE}(\bm{n})} = \frac{1}{\prod_{k=1}^{K}\begin{pmatrix}
+      n_{[k]}\\n_{[k]1}
+    \end{pmatrix}}.
+    \label{eq:cre_sre}
+    \end{equation}
+    
+    \vfill
+    \hfill\hyperlink{pf-cre_sre<1>}{\beamergotobutton{Proof}}\\
+
+    Eq.~\eqref{eq:cre_sre} means that the conditional distribution of $\bm{Z}$ from a CRE given $\bm{n}$ is identical to the distribution of $\bm{Z}$ from an SRE. Hence, the Neymanian analysis becomes \textit{post-stratification}:
+    \[
+    \widehat{\tau}_{PS}= \sum_{k=1}^{K}\pi_{[k]}\widehat{\tau}_{[k]},
+    \]
+    which has an identical form as $\widehat{\tau}_{S}$.
+\end{frame}
+
+\begin{frame}{5.4 Post-stratification in a CRE}
+  \begin{itemize}
+    \item Post-stratification improves efficiency compared to $\widehat{\tau}$, if
+    \begin{itemize}
+      \item Covariates $X$ is predictive of the outcomes,
+      \item and this holds under a limited number of data-generating processes and under that all strata are large enough.
+    \end{itemize}
+    \item Larger $K$ results in some $n_{[k]1}=0$ or some $n_{[k]0}=0$ \\
+    $\leadsto$ small or zero values of $n_{[k]1}$ or $n_{[k]0}$ possibly reduce the power. 
+    \item Stratification uses $X$ in the design stage and post-stratification uses $X$ in the analysis stage.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[label=pf-neymanian]{Proof of Eq.~\eqref{eq:neymanian_inf}}
+  \footnotesize
+    Recall 
+    \[
+    \widehat{\tau} = \frac{1}{n_1}\sum_{i=1}^{n}Z_iY_i-\frac{1}{n_0}\sum_{i=1}^{n}(1-Z_i)Y_i, \quad \widehat{\tau}_S = \sum_{k=1}^{K}\pi_{[k]}\widehat{\tau}_{[k]},
+    \]
+    where 
+    \[
+    \widehat{\tau}_{[k]} = \frac{1}{n_{[k]1}}\sum_{i:X_i=k}^{}Z_iY_i - \frac{1}{n_{[k]0}}\sum_{i:X_i=k}^{}(1-Z_i)Y_i, \quad \pi_{[k]} = \frac{n_{[k]}}{n}
+    \]
+    Then,
+    \begin{align*}
+      \widehat{\tau}_S 
+      &= \sum_{k=1}^{K}\frac{1}{n\cdot \frac{n_{[k]1}}{n_{[k]}}}\sum_{i:X_i=k}^{}Z_iY_i - \sum_{k=1}^{K}\frac{1}{n\cdot \frac{n_{[k]0}}{n_{[k]}}}\sum_{i:X_i=k}^{}(1-Z_i)Y_i \\
+      &= \frac{1}{n_1}\sum_{k=1}^{K}\sum_{i:X_i=k}^{}Z_iY_i-\frac{1}{n_0}\sum_{k=1}^{K}\sum_{i:X_i=k}^{}(1-Z_i)Y_i
+      =\widehat{\tau}. \quad \Box
+    \end{align*}
+    The second equality follows from the assumption $e=e_{[k]}=n_{[k]1}/n_{[k]}.$
+  \vfill
+  \hfill\hyperlink{neymanian<1>}{\beamerreturnbutton{Back}}
+\end{frame}
+
+\begin{frame}[label=pf-variances]{Variances Derivation}
+  \small
+    \begin{align*}
+    S^2(1) 
+    &= \frac{1}{n-1}\sum_{i=1}^{n}\{Y_i(1)-\overline{Y}(1)\}^2\\
+    &= \frac{1}{n-1}\sum_{k=1}^{K}\sum_{i:X_i=k}^{}\{Y_i(1)-\overline{Y}_{[k]}(1)+\overline{Y}_{[k]}(1)-\overline{Y}(1)\}^2\\
+    &= \frac{1}{n-1}\sum_{k=1}^{K}\sum_{i:X_i=k}^{}[\{Y_i(1)-\overline{Y}_{[k]}(1)\}^2+\{\overline{Y}_{[k]}(1)-\overline{Y}(1)\}^2]\\
+    &= \sum_{k=1}^{K}\left[
+      \frac{n_{[k]}-1}{n-1}S_{[k]}^2(1)+\frac{n_{[k]}}{n-1}\{\overline{Y}_{[k]}(1)-\overline{Y}(1)\}^2
+    \right]. \quad \Box
+  \end{align*}
+  \vfill
+  \hfill\hyperlink{variances<1>}{\beamerreturnbutton{Back}}
+\end{frame}
+
+\begin{frame}[label=pf-sre_var_diff]{Proof of Eq.~\eqref{eq:sre_var_diff}}
+
+  { \footnotesize
+    Let $A_k=\overline{Y}_{[k]}(1)-\overline{Y}()1$ and $B_k=\overline{Y}_{[k]}(0)-\overline{Y}(0)$. Because $\tau_{[k]}=\overline{Y}_{[k]}(1)-\overline{Y}_{[k]}(0)$ and $\tau=\overline{Y}(1)-\overline{Y}(0)$, we write the difference as:
+    \begin{align*}
+      \sum_{k=1}^{K}\left[\frac{\pi_{[k]}}{n_1}A_k^2+\frac{\pi_{[k]}}{n_0}B_k^2-\frac{\pi_{[k]}}{n}(A_k-B_k)^2\right]
+      &= \sum_{k=1}^{K}\frac{\pi_{[k]}}{n}\left[\frac{n}{n_1}A_k^2+\frac{n}{n_0}B_k^2-(A_k-B_k)^2\right]\\
+      &= \sum_{k=1}^{K}\frac{\pi_{[k]}}{n}\left[\left(\frac{n}{n_1}-1\right)A_k^2+\left(\frac{n}{n_0}-1\right)B_k^2+2A_kB_k\right]\\
+      &= \sum_{k=1}^{K}\frac{\pi_{[k]}}{n}\left[\frac{n_0}{n_1}A_k^2+\frac{n_1}{n_0}B_k^2+2A_kB_k\right]\\
+      &= \sum_{k=1}^{K}\frac{\pi_{[k]}}{n}\left\{\sqrt{\frac{n_0}{n_1}}A_k+\sqrt{\frac{n_1}{n_0}}B_k\right\}^2 \geq 0. \quad \Box
+    \end{align*}
+  }
+  \vfill
+  \hfill\hyperlink{sre_var_diff<1>}{\beamerreturnbutton{Back}}
+  
+\end{frame}
+
+\begin{frame}[label=pf-cre_sre]{Proof of Eq.~\eqref{eq:cre_sre}}
+  \footnotesize
+
+  In a CRE, $\operatorname{pr}_{CRE}(\bm{Z}=\bm{z}) = 1\big/\dbinom{n}{n_1}$
+  for every $\bm{z}$ with $\sum_i z_i = n_1$.
+
+  Building on Sec.~5.1, the total number pf randomizations in an SRE is $\prod_{k=1}^{K}\binom{n_{[k]}}{n_{[k]1}}$, and these form
+  a subset of all assignments feasible in a CRE. Hence
+  \[
+    \operatorname{pr}_{CRE}(\bm{n})
+    = \frac{\prod_{k=1}^{K}\binom{n_{[k]}}{n_{[k]1}}}{\binom{n}{n_1}}.
+  \]
+
+  If $\bm{z}$ is compatible with $\bm{n}$, $\operatorname{pr}_{CRE}(\bm{Z}=\bm{z},\,\bm{n})
+  = \operatorname{pr}_{CRE}(\bm{Z}=\bm{z})$. Therefore
+  \begin{align*}
+    \operatorname{pr}_{CRE}(\bm{Z}=\bm{z}\mid \bm{n})
+    &= \frac{\operatorname{pr}_{CRE}(\bm{Z}=\bm{z},\,\bm{n})}
+            {\operatorname{pr}_{CRE}(\bm{n})}
+     = \frac{1}{\binom{n}{n_1}}
+       \cdot \frac{\binom{n}{n_1}}{\prod_{k=1}^{K}\binom{n_{[k]}}{n_{[k]1}}}\\[4pt]
+    &= \frac{1}{\prod_{k=1}^{K}\binom{n_{[k]}}{n_{[k]1}}}. \quad \Box
+  \end{align*}
+
+  \vfill
+  \hfill\hyperlink{cre_sre<1>}{\beamerreturnbutton{Back}}
+\end{frame}
+
+
+% =========================
+
+% =========================
+\section{}
+\begin{frame}[allowframebreaks, noframenumbering]{References}
+  \beamerdefaultoverlayspecification{}
+  \small
+  \bibliography{../references}
+\end{frame}
+
+\end{document}

@@ -1,0 +1,481 @@
+\documentclass[aspectratio=169, 12pt]{beamer}
+
+% --- Language and Fonts ---
+\usepackage{fontspec}
+\usepackage[english]{babel}
+\usepackage{amsmath, amssymb, bm}
+% tikz
+\usepackage{tikz}
+\usetikzlibrary{shapes, arrows.meta, positioning, shadows, calc}
+
+% --- Bibliography (BibTeX + natbib) ---
+\usepackage{natbib}
+\bibliographystyle{chicago} 
+
+% =========================================
+% ===== keybox ====================
+% =========================================
+\usepackage[most]{tcolorbox}
+\newtcolorbox{keybox}[1]{
+  enhanced,
+  colback=headbg!4,
+  colframe=headbg,
+  coltitle=headfg,
+  colbacktitle=headbg,
+  title=#1,
+  fonttitle=\bfseries,
+  boxrule=0.8pt,
+  arc=1.5mm,
+  left=2mm,
+  right=2mm,
+  top=1mm,
+  bottom=1mm,
+  before skip=0.2cm,
+  after skip=0.2cm
+}
+
+\usepackage{booktabs}
+
+% =========================================
+% ===== Custom Footline (Page Number) =====
+% =========================================
+
+
+\setbeamercolor{footline}{fg=headbg}
+\setbeamerfont{footline}{size=\scriptsize}
+
+\setbeamertemplate{footline}{%
+  \hfill%
+  \usebeamercolor[fg]{footline}%
+  \usebeamerfont{footline}%
+  \insertframenumber\,/\,\inserttotalframenumber\kern1em\vskip3pt%
+}
+
+\setbeamertemplate{navigation symbols}{}
+
+\usetheme{default}
+\usepackage{xcolor}
+
+\definecolor{headbg}{RGB}{30, 60, 120}
+\definecolor{headfg}{RGB}{255, 255, 255}
+\definecolor{accent}{RGB}{200, 50, 50}
+
+\setbeamercolor{headline}{bg=headbg, fg=headfg}
+\setbeamercolor{section in head/foot}{bg=headbg, fg=headfg}
+\setbeamercolor{subsection in head/foot}{bg=headbg!80, fg=headfg}
+\setbeamercolor{frametitle}{bg=headbg, fg=headfg}
+
+% Step indicator command
+\newcommand{\stepindicator}[1]{%
+  \hfill {\scriptsize \textit{\textcolor{headbg}{Step #1 / 6}}}%
+}
+\DeclareMathOperator*{\argmin}{arg\,min}
+
+\usepackage{hyperref}
+
+
+% --- Title ---
+\title[]{A First Course in Causal Inference Ch~7}
+\author[Kodai Minesaki]{Kodai Minesaki}
+\institute[Faculty of Engineering, The University of Tokyo]{Faculty of Engineering, The University of Tokyo}
+\date{\today}
+
+\begin{document}
+
+% --- Title Slide ---
+\begin{frame}
+\titlepage
+\end{frame}
+
+
+\begin{frame}
+
+  {
+    \large
+    Ch.~7 Matched-Pairs Experiment
+  }
+  
+\end{frame}
+
+\begin{frame}{Ch.~7 Matched-Pairs Experiment}
+  \begin{itemize}
+    \item The matched-pairs experiment (MPE) is the most extreme version of the SRE with only one treated unit and one control unit within each stratum.
+    \item It has its own estimation and inference strategy
+  \end{itemize}
+  
+\end{frame}
+
+\begin{frame}{7.1 Design of the experiment and potential outcomes}
+  \begin{itemize}
+    \item Consider an experiment with $2n$ units.
+    \item If we have predictive covariates to the outcomes, we can pair units based on the similarity of covariates.
+    \item With many covariates, we can define pairwise distances between units and the form pairs based on these distances.
+    \item We assume that the pairs are formed based on the covariates and the discuss the subsequent design and analysis issues.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{7.1 Design of the experiment and potential outcomes}
+    Setup
+    \begin{itemize}
+        \item Let $(i,j)$ index the unit $j$ in pair $i$, where $i=1,\dots,n$ and $j=1,2$.
+        \item Unit $(i,j)$ has potential outcomes $Y_{ij}(1)$ and $Y_{i,j}(0)$ under the treatment and control, respectively.
+        \item Within each pair, we randomly assign one into the treatment group ($Z_i=1$) and the control group ($Z_i=0$).
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{7.1 Design of the experiment and potential outcomes}
+    \small
+    \begin{keybox}{Definition~7.1 (MPE)}
+        \label{def-7-1}
+        The treatment assignments satisfy
+        \[
+        (Z_i)_{i=1}^n \overset{\text{i.i.d.}}{\sim} \operatorname{Bernoulli}\left(\tfrac{1}{2}\right).
+        \]
+        The observed outcomes within pair $i$ are
+        \[
+        Y_{i1} = Z_i Y_{i1}(1) + (1 - Z_i) Y_{i1}(0) =
+        \begin{cases}
+            Y_{i1}(1), & \text{if } Z_i = 1, \\
+            Y_{i1}(0), & \text{if } Z_i = 0,
+        \end{cases}
+        \]
+        and
+        \[
+        Y_{i2} = Z_i Y_{i2}(0) + (1 - Z_i) Y_{i2}(1) =
+        \begin{cases}
+            Y_{i2}(0), & \text{if } Z_i = 1, \\
+            Y_{i2}(1), & \text{if } Z_i = 0.
+        \end{cases}
+        \]
+        So the observed data are $(Z_i,Y_{i1},Y_{i2})_{i=1}^n$
+        \label{def-7-1}
+    \end{keybox}
+\end{frame}
+
+\begin{frame}{7.3 Neymanian inference}
+    \begin{itemize}
+        \item The average causal effect within pair $i$ is 
+        \[
+        \tau_i = \frac{1}{2}\left[\{Y_{i1}(1)-Y_{i2}(0)\} + \{Y_{i2}(1)-Y_{i1}(0)\}\right].
+        \]
+        \item and the average causal effect for all units is
+        \[
+        \tau = \frac{1}{n}\sum_{i=1}^{n}\tau_i = \frac{1}{2n}\sum_{i=1}^{n}\sum_{j=1}^{2}\{Y_{ij}(1)-Y_{ij}(0)\}.
+        \]
+        \item Both $\hat{\tau}_i$ and $\hat{\tau}$ are unbiased for $\tau_i$ and $\tau$, respectively.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{7.3 Neymanian inference}
+    We can calculate the variance of $\hat{\tau}$.
+
+    For simplicity, let $A_i=Y_{i1}(1)-Y_{i2}(0)$ and $B_i=Y_{i2}(1)-Y_{i1}(0)$. Then
+    \[
+    \hat{\tau}_i = Z_iA_i + (1-Z_i)B_i = Z_i(A_i-B_i)+B_i.
+    \]
+    Check the unbiasedness of $\hat{\tau}_i$: $$\mathbb{E}[\hat{\tau}_i] = \mathbb{E}[Z_i](A_i-B_i)+B_i = \dfrac{1}{2}(A_i-B_i)+B_i = \dfrac{A_i+B_i}{2}.\quad (\because Z_i\sim \text{Bernoulli}(1/2).)$$
+    Here, $\operatorname{var}(\hat{\tau}_i) = \operatorname{var}(Z_i(A_i-B_i)+B_i) = \operatorname{var}(Z_i)(A_i-B_i)^2=\dfrac{1}{4}(A_i-B_i)^2.$ Therefore, 
+    \[
+    \operatorname{var}(\hat{\tau}) = \operatorname{var}\left(\frac{1}{n}\sum_{i=1}^{n}\operatorname{var}(\hat{\tau}_i)\right) = \frac{1}{4n^2}\sum_{i=1}^{n}\{Y_{i1}(1)-Y_{i2}(0) + Y_{i1}(0) - Y_{i2}(1)\}. \quad\Box
+    \]
+\end{frame}
+
+\begin{frame}{7.3 Neymanian inference}
+    \begin{itemize}
+        \item We cannot follow the same strategy under the SRE to estimate the variance of $\hat{\tau}$ under the MPE.
+        \item In MPE, the within-pair sample variances of the outcomes are not well defined.
+        \begin{itemize}
+            \item In SRE, we calculate variances for a treatment group and a control group in each stratum but in MPE, there is only one in both groups in each stratum.
+        \end{itemize}
+        \item Is it possible to estimate the variance of $\hat{\tau}$ in the MPE?
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{7.3 Neymanian inference}
+    \begin{itemize}
+        \item Think about the classic i.i.d. sampling:
+        \item Suppose the $\hat{\tau}_i$'s are i.i.d. with mean $\mu$ and $\sigma^2$.
+        \item Then the variance of $\hat{\tau}=n^{-1}\sum_{i=1}^{n}\hat{\tau}_i$ is $\sigma^2/n$.
+        \item An unbiased estimator for $\sigma^2$ is $(n-1)^{-1}\sum_{i=1}^{n}(\hat{\tau}_i-\hat{\tau})^2$.  
+        \item So the unbiased estimator for $\operatorname{var}(\hat{\tau})$ is 
+        \begin{equation}
+            \widehat{V}= \frac{1}{n(n-1)}\sum_{i=1}^{n}(\hat{\tau}_i-\hat{\tau})^2.
+            \label{variance-estimator-mpe}
+        \end{equation}
+
+        \item We derive $\widehat{V}$ from a completely different setting from the MPE and a different motivation, so does it work for the MPE?
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{7.3 Neymanian inference}
+    \begin{keybox}{Theorem~7.1}
+        Under the MPE, $\widehat{V}$ defined in \eqref{variance-estimator-mpe} is a conservative estimator for the true variance of $\hat{\tau}$:
+        \[
+        \mathbb{E}[\widehat{V}] - \operatorname{var}(\hat{\tau}) = \frac{1}{n(n-1)}\sum_{i=1}^{n}(\tau_i-\tau)^2\geq 0.
+        \]
+        If the $\tau_i$'s are constant across pairs, then $\mathbb{E}[\widehat{V}] = \operatorname{var}(\hat{\tau})$.
+        \label{thm-7-1}
+    \end{keybox}
+    \begin{itemize}
+        \item Thm.~7.1 states that under the MPE,
+        \begin{enumerate}
+            \item $\widehat{V}$ is a conservative variance estimator in general;
+            \item $\widehat{V}$ is unbiased if the average causal effecsts are constant across pairs.
+        \end{enumerate}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{7.3 Neymanian inference}
+    
+    {
+        \small
+        Proof of Thm.~7.1:
+
+        Recall $\sum_{i=1}^{n}(a_i-\bar{a})^2=\sum_{i=1}^{n}a_i^2-n\bar{a}^2$ and $\operatorname{var}[W]=\mathbb{E}[W^2]-(\mathbb{E}[W])^2$. Use them in the following manipulation:
+        \begin{align*}
+            n(n-1)\mathbb{E}[\widehat{V}] 
+            &= \mathbb{E}\left[\sum_{i=1}^{n}(\hat{\tau}_i-\hat{\tau})^2\right]
+            = \mathbb{E}\left[\sum_{i=1}^{n}\hat{\tau}_i^2-n\hat{\tau}^2\right]\\
+            &= \sum_{i=1}^{n}\{\operatorname{var}(\hat{\tau})+\tau_i^2\} - n\{\operatorname{var}(\hat{\tau})+\tau^2\}\\
+            &= n^2\operatorname{var}(\hat{\tau}) - n\operatorname{var}(\hat{\tau}) + \sum_{i=1}^{n}(\tau_i-\tau)^2.
+        \end{align*}
+        Therefore,
+        \[
+        \mathbb{E}[\widehat{V}] = \operatorname{var}(\hat{\tau}) + \{n(n-1)\}^{-1}\sum_{i=1}^{n}(\tau_i-\tau)^2\geq 0.\quad \Box
+        \]
+    }
+\end{frame}
+
+\begin{frame}{7.3 Neymanian inference}
+    Both the point estimator $\hat{\tau}$ and the variance estimator $\widehat{V}$ can be conveniently obtained by OLS:
+    \begin{keybox}{Proposition 7.1}
+        $\hat{\tau}$ and $\widehat{V}$ are identical to the coefficient and variance estimator of the intercept from the OLS fit of the vector $(\hat{\tau}_1,\hat{\tau}_2,\dots,\hat{\tau}_n)^T$ on the intercept only.
+    \end{keybox}
+\end{frame}
+
+\begin{frame}{7.3 Neymanian inference}
+    Proof of Prop.~7.1.
+\end{frame}
+
+\begin{frame}{7.4 Covariate adjustment}
+    \begin{itemize}
+        \item Although we have matched on covariates in the design stage, it is possible that the matching is not perfect $(X_{i1}\neq X_{i2})$.
+        \item In this case, we can adjust for the covariates to further improve estimation efficiency.
+        \item Assume that each unit $(i,j)$ has covariates $X_{ij}$.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{7.4 Covariate adjustment}
+    \begin{itemize}
+        \item Define the within-pair differences in covariates: $$\hat{\tau}_{X,i} = Z_i(X_{i1}-X_{i2}) + (1-Z_i)(X_{i2}-X_{i1})=(2Z_i-1)(X_{i1}-X_{i2}),$$
+        \item and their average:
+        \[
+        \hat{\tau}_X = \frac{1}{n}\sum_{i=1}^{n}\hat{\tau}_{X,i}.
+        \]
+        \item We can show that
+        \[
+        \mathbb{E}[\hat{\tau}_{X,i}]=0,\quad \mathbb{E}[\hat{\tau}_X]=0,
+        \]
+        \item and 
+        \[
+        \operatorname{cov}(\hat{\tau}_X)=\frac{1}{n^2}\sum_{i=1}^{n}\hat{\tau}_{X,i}\hat{\tau}_{X,i}^T.
+        \]
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{7.4 Covariate adjustment}
+    \begin{itemize}
+        \item In a realized MPE, $\operatorname{cov}(\hat{\tau}_X)$ is not zero unless all the $\hat{\tau}_X$'s are zero.\\
+        $\leadsto$ Some realized values of $\hat{\tau}_{X}\neq 0$.
+        \item This is the reason why there exists imbalance and we would like to adjust the imbalance to improve estimation efficiency.
+        \item Similar to the discusion in the last chapter, consider a class of estimators:
+        \[
+        \hat{\tau}_{\gamma}=\hat{\tau}-\gamma^T\hat{\tau}_X,
+        \]
+        which $\hat{\tau}_{\gamma}-\hat{\tau}$ has mean zero for any fixed $\gamma$.
+        \item We want to choose $\gamma$ to minimize the variance of $\hat{\tau}(\gamma)$.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{7.4 Covariate adjustment}
+    \begin{itemize}
+        \item The variance of $\hat{\tau}(\gamma)$ is
+        \begin{align*}
+            \operatorname{var} 
+            &= \operatorname{var}(\hat{\tau}-\gamma^T\hat{\tau}_X) \\
+            &= \operatorname{var}(\hat{\tau}) + \gamma^T\operatorname{cov}(\hat{\tau}_X)\gamma - 2\gamma^T\operatorname{cov}(\hat{\tau}_X,\hat{\tau}),
+        \end{align*}
+        which is minimized at
+        \[
+        \tilde{\gamma} = \operatorname{cov}(\hat{\tau}_X)^{-1}\operatorname{cov}(\hat{\tau}_X,\hat{\tau}).
+        \]
+        \item Rewrite the formula for $\operatorname{cov}(\hat{\tau}_X)$ as $$\operatorname{cov}(\hat{\tau}_X) = \frac{1}{n^2}\sum_{i=1}^{n}|\hat{\tau}_{X,i}||\hat{\tau}_{X,i}|^T,$$
+        where $|\cdot|$ denotes the component-wise absolute value of a vector.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{7.4 Covariate adjustment}
+    \begin{itemize}
+        \item We can calculate $\operatorname{cov}(\hat{\tau}_X)$ but we cannot calculate $\operatorname{cov}(\hat{\tau}_X, \hat{\tau})$
+        \begin{itemize}
+            \item This is because we need unknown potential outcomes to compute this.
+        \end{itemize}
+        \item Fortunately, we can obtain an unbiased estimator for it.
+    \end{itemize}
+    \vspace{0.7cm}
+    \begin{keybox}{Theorem 7.2}
+        An unbiased estimator for $\operatorname{cov}(\hat{\tau}_X,\hat{\tau})$ is
+        \[
+        \hat{\theta} = \frac{1}{n(n-1)}\sum_{i=1}^{n}(\hat{\tau}_{X,i}-\hat{\tau}_X)(\hat{\tau}_{i}-\hat{\tau}).
+        \]
+    \end{keybox}
+\end{frame}
+
+\begin{frame}{7.4 Covariate adjustment}
+    \small
+    Substiting $\hat{\theta}$ into $\tilde{\gamma}$, then we obtain $\hat{\gamma}$ as follows:
+    \begin{align*}
+        \hat{\gamma}
+        &= \left(\frac{1}{n^2}\sum_{i=1}^{n}\hat{\tau}_{X,i}\hat{\tau}_{X,i}^T\right)^{-1}\left\{\frac{1}{n(n-1)}\sum_{i=1}^{n}(\hat{\tau}_{X,i}-\hat{\tau}_X)(\hat{\tau}_{i}-\hat{\tau})\right\}\\
+        &= \left(\frac{1}{n^2}\sum_{i=1}^{n}(\hat{\tau}_{X,i}-\hat{\tau}_X)(\hat{\tau}_{X,i}-\hat{\tau}_X)^T + \frac{1}{n^2}\cdot n\hat{\tau}_X\hat{\tau}_X^T\right)^{-1}\left\{\frac{1}{n(n-1)}\sum_{i=1}^{n}(\hat{\tau}_{X,i}-\hat{\tau}_X)(\hat{\tau}_{i}-\hat{\tau})\right\}\\
+        &\approx \left(\sum_{i=1}^{n}(\hat{\tau}_{X,i}-\hat{\tau}_X)(\hat{\tau}_{X,i}-\hat{\tau}_X)^T\right)^{-1}\left\{(\hat{\tau}_{X,i}-\hat{\tau}_X)(\hat{\tau}_{i}-\hat{\tau})\right\}.
+    \end{align*}
+    The second equality follows from $\sum_{i=1}^{n}(x_i-\bar{x})^2=\sum_{i=1}^{n}x_i^2-n\bar{x}^2$. The approximation holds from $\dfrac{n^2}{n(n-1)}\xrightarrow{n\to\infty}1$ and $\dfrac{n\hat{\tau}_X\hat{\tau}_X^T}{n^2}\xrightarrow{n\to\infty}0$.
+\end{frame}
+
+\begin{frame}{7.4 Covariate adjustment}
+    \begin{itemize}
+        \item This is approximately the coeeficient of the $\hat{\tau}_{X,i}$ in the OLS fit of the $\hat{\tau}_i$'s on the $\hat{\tau}_{X,i}$'s with an intercept.
+        \item The final estimator is
+        \[
+        \hat{\tau}_{\text{adj}} = \hat{\tau}-\hat{\gamma}^T\hat{\tau}_X,
+        \]
+        which is approximately the intercept in the OLS fit of the $\hat{\tau}_i$'s on the $\hat{\tau}_{X,i}$'s with an intercept.
+        \item The conservative variance estimator for $\hat{\tau}_{\text{adj}}$ is then
+        \begin{align*}
+            \widehat{V}_{\text{adj}}
+            &= \operatorname{var}(\hat{\tau}-\hat{\gamma}^T\hat{\tau}_X)\\
+            &= \widehat{V} + \hat{\gamma}^T\operatorname{cov}(\hat{\tau}_X)\hat{\gamma} - 2\hat{\gamma}^T\hat{\theta}\\
+            &= \widehat{V} - \hat{\theta}\operatorname{cov}(\hat{\tau}_X)^{-1}\hat{\theta}.
+        \end{align*}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{7.4 Covariate adjustment}
+    \begin{keybox}{Proposition 7.2}
+        Under the MPE, the covariance-adjusted estimator $\hat{\tau}_{\text{adj}}$ and the associated variance estimator $\widehat{V}_{\text{adj}}$ can be conviniently approximated by the intercept and the associated variance estimator from the OLS fit of the vector of the $\hat{\tau}_i$'s on the $1$'s and the matrix of the $\hat{\tau}_{X,i}$'s.
+    \end{keybox}
+    \begin{itemize}
+        \item Neither Prop.~7.1 nor ~7.2 requires the EHW correction of the variance estimator.
+        \item In the MPE, we only use a pair so we do not need to center the covariate.
+        \item Explicitly, let $\overline{X}$ be the mean covariate, then $X_{i1}-X_{i2}=(X_{i1}-\overline{X})-(X_{i2}-\overline{X})$.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{7.6 Comparing the MPE and CRE.}
+    \begin{itemize}
+        \item \citet{imai2008variance} compared the MPE and CRE: the MPE gives more precise estimators if the matching is well done and the covariates are predictive of the outcomes.
+        \item Without the outcome data in the design stafe, it is hard to decide whether this is true or not.
+        \item Usually the MPE improves efficiency, it can be not true with small sample.
+        \item $\leadsto$ The MPE is not superior to the CRE based on the FRT.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{7.7 Extension to the general matched experiment}
+    \begin{itemize}
+        \item Extend the MPE to the general matched experiment with varying numbers of control units.
+        \begin{itemize}
+            \item If we consider a case with varying numbers of treatment units, it is essentially same to the case with varying numbers of control units.
+            \item If we consider a case with varying numbers of both treatment and control units, it is equivalent to the SRE.
+        \end{itemize}
+        \item Namely, $\text{MPE}\subset\text{Extended MPE}\subset\text{SRE}.$
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{7.7 Extension to the general matched experiment}
+    Setup
+    \begin{itemize}
+        \item $n$ matched sets indexed by $i=1,\dots,n$.
+        \item For the matched set $i$, $M_i+1$ units; $M_i$'s can vary.
+        \item Total number of experimental units is $N=n+\sum_{i=1}^{n}M_i$.
+        \item Let $ij$ index the unit $j$ within matched set $i\,(i=1,\dots,n\text{ and }j=1,\dots,M_i+1)$.
+        \item Unit $ij$ has potential outcomes $Y_{ij}(1)$ and $Y_{ij}(0)$.
+        \item Within set $i$, $1$ unit receives the treatment; the rest $M_i$ recerives the control.
+        \item $Z_{ij}$: the treatment indicator for unit $ij$.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{7.7 Extension to the general matched experiment}
+    \begin{itemize}
+        \item One of the potential outcomes:
+        \[
+        Y_{ij}=Z_{ij}Y_{ij}(1) + (1-Z_{ij})Y_{ij}(0).
+        \]
+        \item The average causal effect within the matched set $i$ equals:
+        \[
+        \tau_i = \frac{1}{M_i+1}\sum_{j=1}^{M_i+1}\{Y_{ij}(1)-Y_{ij}(0)\}.
+        \]
+        \item An unbised estimator of $\tau_i$ is
+        \[
+        \hat{\tau}_i=\sum_{j=1}^{M_i+1}Z_{ij}Y_{ij}-\frac{1}{M_i}\sum_{j=1}^{M_i+1}(1-Z_{ij})Y_{ij}.
+        \]
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{7.7 Extension to the general matched experiment}
+    \begin{itemize}
+        \item We first focus on estimating the average of the within-strata effects: $\tau=n^{-1}\sum_{i=1}^{n}\tau_i$.
+        \item It has an unbiased estimator: $\hat{\tau}=n^{-1}\sum_{i=1}^{n}\hat{\tau}_i$.
+        \item Importtantly, the $\tau$ above is the average of the $\tau_i$'s and it does not equal the average causal effect for the $N$ units in the experiment when the $M_i$'s vary.
+        \item The average causal effect equals
+        \[
+        \tau'=\frac{1}{N}\sum_{i=1}^{n}\sum_{j=1}^{1+M_i}\{Y_{ij}(1)-Y_{ij}(0)\} = \sum_{i=1}^{n}\frac{1+M_i}{N}\tau_i.
+        \]
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{7.7 Extension to the general matched experiment}
+    \begin{itemize}
+        \item To unify the discussion, we consider the weighted causal effect
+        \[
+        \tau_w = \sum_{i=1}^{n}w_i\tau_i, 
+        \]
+        with $\sum_{i=1}^{n}w_i=1$.
+        \item It is straightforward to obtain an unbiased estimator $\hat{\tau}_w=\sum_{i=1}^{n}w_i\hat{\tau}_i$, and calculate its variance $\operatorname{var}(\hat{\tau}_w)=\sum_{i=1}^{n}w_i^2\operatorname{var}(\hat{\tau}_i)$.
+        \item However, we have only one realized value of $\hat{\tau}_i$ so we cannot calculate $\operatorname{var}(\hat{\tau}_i)$.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{7.7 Extension to the general matched experiment}
+    \small
+    \begin{itemize}
+        \item We give a final form of the variance estimator:
+        \[
+        \hat{V}_w = \sum_{i=1}^{n}c_i(\hat{\tau}_i-\hat{\tau}_w)^2
+        \]
+        where
+        \[
+        c_i = \frac{\frac{w_i^2}{1-2w_i}}{1+\sum_{i=1}^{n}\frac{w_i^2}{1-2w_i}}.
+        \]
+    \end{itemize}
+    \begin{keybox}{Theorem}
+        Under the general matched experiment with varying $M_i$'s, if $w_i<1/2$ for all $i$'s, then
+        \[
+        \mathbb{E}[\hat{V}_w]-\operatorname{var}(\hat{\tau}/w)=\sum_{i=1}^{n}c_i(\tau_i-\tau_w)^2\geq \operatorname{var}(\hat{\tau}_w)\geq 0,
+        \]
+        with equality holding if the $\tau_i$'s are constant.
+    \end{keybox}
+\end{frame}
+
+
+% =========================
+
+% =========================
+\section{}
+\begin{frame}[allowframebreaks, noframenumbering]{References}
+  \beamerdefaultoverlayspecification{}
+  \small
+  \bibliography{../references}
+\end{frame}
+
+\end{document}

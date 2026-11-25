@@ -1,0 +1,673 @@
+\documentclass[aspectratio=169, 12pt]{beamer}
+
+% --- Language and Fonts ---
+\usepackage{fontspec}
+\usepackage[english]{babel}
+\usepackage{amsmath, amssymb, bm}
+% tikz
+\usepackage{tikz}
+\usetikzlibrary{shapes, arrows.meta, positioning, shadows, calc}
+
+% --- Bibliography (BibTeX + natbib) ---
+\usepackage{natbib}
+\bibliographystyle{chicago} 
+
+% =========================================
+% ===== keybox ====================
+% =========================================
+\usepackage[most]{tcolorbox}
+\newtcolorbox{keybox}[1]{
+  enhanced,
+  colback=headbg!4,
+  colframe=headbg,
+  coltitle=headfg,
+  colbacktitle=headbg,
+  title=#1,
+  fonttitle=\bfseries,
+  boxrule=0.8pt,
+  arc=1.5mm,
+  left=2mm,
+  right=2mm,
+  top=1mm,
+  bottom=1mm,
+  before skip=0.2cm,
+  after skip=0.2cm
+}
+
+\usepackage{booktabs}
+
+% =========================================
+% ===== Custom Footline (Page Number) =====
+% =========================================
+
+
+\setbeamercolor{footline}{fg=headbg}
+\setbeamerfont{footline}{size=\scriptsize}
+
+\setbeamertemplate{footline}{%
+  \hfill%
+  \usebeamercolor[fg]{footline}%
+  \usebeamerfont{footline}%
+  \insertframenumber\,/\,\inserttotalframenumber\kern1em\vskip3pt%
+}
+
+\setbeamertemplate{navigation symbols}{}
+
+\usetheme{default}
+\usepackage{xcolor}
+
+\definecolor{headbg}{RGB}{30, 60, 120}
+\definecolor{headfg}{RGB}{255, 255, 255}
+\definecolor{accent}{RGB}{200, 50, 50}
+
+\setbeamercolor{headline}{bg=headbg, fg=headfg}
+\setbeamercolor{section in head/foot}{bg=headbg, fg=headfg}
+\setbeamercolor{subsection in head/foot}{bg=headbg!80, fg=headfg}
+\setbeamercolor{frametitle}{bg=headbg, fg=headfg}
+
+% Step indicator command
+\newcommand{\stepindicator}[1]{%
+  \hfill {\scriptsize \textit{\textcolor{headbg}{Step #1 / 6}}}%
+}
+\DeclareMathOperator*{\argmin}{arg\,min}
+
+\usepackage{hyperref}
+
+
+% --- Title ---
+\title[]{A First Course in Causal Inference Ch~6}
+\author[Kodai Minesaki]{Kodai Minesaki}
+\institute[Faculty of Engineering, The University of Tokyo]{Faculty of Engineering, The University of Tokyo}
+\date{\today}
+
+\begin{document}
+
+% --- Title Slide ---
+\begin{frame}
+\titlepage
+\end{frame}
+
+
+\begin{frame}
+
+  {
+    \large
+    Ch.~6 Randomization and Regression Adjustment
+  }
+  
+\end{frame}
+
+\begin{frame}{Ch.~6 Randomization and Regression Adjustment}
+  Motivation
+  \begin{itemize}
+    \item Stratification and post-stratification is for design and analysis with discrete covariates.
+    \item How should we deal with multidimensional, possibly continuous covariates?
+  \end{itemize}
+  \begin{table}
+    \centering
+    \begin{tabular}{lcc}
+      \toprule
+      & design & analysis \\
+      \midrule
+      discrete covariate & stratification & analysis \\
+      general covariate & rerandomization & regression adjustment\\
+      \bottomrule
+    \end{tabular}
+  \end{table}
+\end{frame}
+
+\begin{frame}{6.1 Rerandomization}
+  \begin{itemize}
+    \item Setup: a finite population of $n$ units; $n_1$ units in a treatment group; $n_0$ in a control group; $\bm{Z}=(Z_i,..,Z_n)$ is the treatment vector for these units; and unit $i$ has covariate $X_i\in \mathbb{R}^{K}$\footnote{This covariate $X_i$ can have continuous or binary components}.
+    \item Stack them as an $n\times K$ covariate matrix $\bm{X}=(X_1, \dots,X_n)^{T}$ and center them as mean zero $\overline{X}=\dfrac{1}{n}\sum_{i=1}^{n}X_i=0$.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[label=neymanian_cov]{6.1 Rerandomization}
+  \begin{itemize}
+    \item In a CRE, the covariates in the treatment and control groups are balanced \textbf{on average} (\textit{not for every stratum!}). Namely, let
+    \[
+    \widehat{\tau}_X = \frac{1}{n_1}\sum_{i=1}^{n}Z_iX_i-\frac{1}{n_0}\sum_{i=1}^{n}(1-Z_i)X_i,
+    \]
+    then $\mathbb{E}[\widehat{\tau}_X]=0$.
+    \item In the realized treatment allocation, $\widehat{\tau}_X$ is often not zero.
+    \item Building on \citet{neyman1923application}, 
+    \begin{equation}
+    \operatorname{cov}(\widehat{\tau}_X) = \frac{S_X^2}{n_1}+ \frac{S_X^2}{n_0} = \frac{n}{n_1n_0}S_X^2,
+    \label{eq:neymanian_cov}
+    \end{equation}
+    where $S_X^2=\dfrac{1}{n_1}\sum_{i=1}^{n}X_iX_i^T$ is the finite-population covariance matrix of the covariates.
+    \vfill
+    \hfill\hyperlink{pr-neymanian_cov<1>}{\beamergotobutton{Proof}}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{6.1 Rerandomization}
+  \begin{keybox}{Definition 6.0 Mahalanobis Distance}
+  Given a probability distribution $Q\in \mathbb{R}^N$, with mean $\bm{\mu}=(\mu_1,\dots,\mu_N)^T$ and positive semi-definite covariance matrix $\bm{\Sigma}$, the Mahalanobis distance of a point $\bm{x}=(x_1,\dots,x_N)^T$ from $Q$ is defined as:
+  \[
+  M(\bm{x},Q) 
+  = \sqrt{(\bm{x}-\bm{\mu})^T\bm{\Sigma}^{-1}(\bm{x}-\bm{\mu})}.
+  \]
+  Let $\bm{y}=(y_1,\dots,y_N)^T$ be another point, then the Mahalaanobis distance between $\bm{x}$ and $\bm{y}$ is defined as:
+  \[
+  M(\bm{x},\bm{y}) 
+  = \sqrt{(\bm{x}-\bm{y})^T\bm{\Sigma}^{-1}(\bm{x}-\bm{y})}.
+  \]
+  \label{def:mahalanobis}
+  \end{keybox}
+\end{frame}
+
+\begin{frame}[label=lemma-6-1]{6.1 Rerandomization}
+  Following Def.~\ref{def:mahalanobis}, the difference between the treatment and control groups is 
+  \[
+  M 
+  = \widehat{\tau}_X^T\operatorname{cov}(\widehat{\tau}_X)^{-1}\widehat{\tau}_X 
+  = \widehat{\tau}_X^T\left(\frac{n}{n_1n_0}S_X^2\right)^{-1}\widehat{\tau}_X.
+  \]
+  \begin{keybox}{Lemma 6.1}
+    $M$ remains the same if we transform $X_i$ to $b_0+BX_i$ for all units $i=1,\dots,n$ where $b_0\in \mathbb{R}^K$ and $B\in\mathbb{R}^{K\times K}$ is invertible.
+    \label{lemma1}
+    \vfill
+    \hfill\hyperlink{pr-lemma-6-1<1>}{\beamergotobutton{Proof}}
+  \end{keybox}
+  \begin{itemize}
+    \item With large $n$, the Mahalanobis distance $M$ is approximately $\chi_K^2$ under the CRE.
+    \item Rerandomization avoids covariate imbalance by discarding the treatment allocations with large values of $M$.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{6.1 Rerandomization}
+  \begin{keybox}{Definition 6.1 ReM(Rerandomization)}
+    Draw $\bm{Z}$ from CRE and accept it if and only if 
+    \[
+    M \leq a,
+    \]
+    for some predetermined constant $a>0$.
+  \end{keybox}
+  \begin{itemize}
+    \item To put it simply, rerandomization keeps randomizing until the treatment and control groups are \textbf{close enough}, $M \le a$.
+    \item When $a=\infty$, we just conduct a CRE.
+    \item When $a=0$, there are very few feasible treatment allocations, then consequently, the experiment has little randomness.
+    \item In practice, we choose a small but not too extreme $a$ or some upper quantile of a $\chi_K^2$ distribution.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{6.1 Rerandomization}
+  \begin{keybox}{Condition~6.1}
+    As $n\to \infty$,
+    \begin{enumerate}
+      \item $\dfrac{n_1}{n}$ and $\dfrac{n_0}{n}$ have positive limits;
+      \item the finite population covariance of $\{X_i, Y_i(1), Y_i(0), \tau_i\}$ has a finite limit;
+      \item $\max_{1\leq i \leq n}\dfrac{\{Y_i(1)-\overline{Y}(1)\}^2}{n}\to 0$, $\max_{1\leq i\leq n}\dfrac{\{Y_i(0)-\overline{Y}(0)\}^2}{n}\to 0$ and $\max_{1 \leq i \leq n}\dfrac{X_i^TX_i}{n}\to 0$.
+    \end{enumerate}
+    \label{condition1:reg_cond}
+  \end{keybox}
+\end{frame}
+
+\begin{frame}{6.1 Rerandomization}
+  Intuitive understanding for Condition~\ref{condition1:reg_cond}:
+  \begin{enumerate}
+    \item With large $n$, neither of $n_1$ or $n_0$ is not extremely small.
+    \item We exclude a sample such that e.g., the variance of $Y_i(1)$ diverges to $\infty$ as $n\to\infty$.
+    \item One unit does not dominate the sample.
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{6.1 Rerandomization}
+  
+  Let 
+  \[
+  L_{K,a}\sim D_1 \mid \bm{D}^T\bm{D} \leq a,
+  \]
+  where $\bm{D}=(D_1,\dots,D_K)$ follows a $K$-dimensional standard Normal distribution; let $\varepsilon$ follow a univariate standard Normal distribution; and $L_{K,a}\perp \varepsilon$.  
+  \begin{keybox}{Theorem~6.1}
+    Under ReM with $M\leq a$ and Condition~\ref{condition1:reg_cond}, we have
+    \[
+    \widehat{\tau}-\tau \sim \sqrt{\operatorname{var}(\widehat{\tau})}\left\{\sqrt{R^2}L_{K,a}+\sqrt{1-R^2}\varepsilon\right\},
+    \]
+    where 
+    $
+    \operatorname{var}(\widehat{\tau}) = \dfrac{S^2(1)}{n_1}+\dfrac{S^2(0)}{n_0} - \dfrac{S^2(\tau)}{n}
+    $
+    is a \citet{neyman1923application}'s variance formula and $R^2=\operatorname{corr}^2(\widehat{\tau},\widehat{\tau}_X)$ is the squared multiple correlation coefficient between $\widehat{\tau}$ and $\widehat{\tau}_X$ under the CRE. 
+  \end{keybox}
+\end{frame}
+
+\begin{frame}{6.1 Rerandomization}
+  Interpretation of Thm.~6.1
+  \begin{itemize}
+    \item $\widehat{\tau}$ decomposes into a component that is a linear combination of $\widehat{\tau}_X$ and a component that is orthogonal to $\widehat{\tau}_X$.
+    \begin{itemize}
+      \item Suppose that $X$ is pre-test score and that the higher the pre-test score is the higher the post-test score. In this case, $\widehat{\tau}-\tau$ depends on the covariate imbalance.
+      \item Even if $\widehat{\tau}_X=0$, meaning that the covariate is completely balanced, $\widehat{\tau}_X-\tau$ depends on the other factors.
+    \end{itemize}
+    \item ReM mitigates the covariate imbalance, so\dots
+    \begin{itemize}
+      \item When $R^2$ is large (huge covariance imbalance), ReM successfully decrease $\widehat{\tau}-\tau$.
+      \item When $R^2$ is small (small covariance imbalance), ReM does not decrase $\widehat{\tau}-\tau$ so much.
+    \end{itemize}
+    \item $\leadsto$ The efficiency gain due to ReM depends on $R^2$
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{6.1 Rerandomization}
+  \begin{keybox}{Proposition 6.1}
+    Under the CRE, we have
+    \[
+    R^2 = \operatorname{corr}^2(\widehat{\tau}, \widehat{\tau}_X) = \frac{\dfrac{S^2(1\mid X)}{n_1} + \dfrac{S^2(0\mid X)}{n_0} - \dfrac{S^2(\tau \mid X)}{n}}{\dfrac{S^2(1)}{n_1} + \dfrac{S^2(0)}{n_0} - \dfrac{S^2(\tau)}{n}},
+    \]
+    where $\{S^2(1), S^2(0), S^2(\tau)\}$ are the finite population vasriances of $\{Y_i(1),Y_i(0), \tau_i\}_{i=1}^{n}$, and $\{S^2(1\mid x), S^2(0 \mid x), S^2(\tau\mid x)\}$ are the corresponding finite population variances of their linear projections on $(1,X_i)$. 
+
+  \end{keybox}
+\end{frame}
+
+\begin{frame}{6.1 Rerandomization}
+  \begin{itemize}
+    \item When $0<a<\infty$ the asymptotic distribution of $\widehat{\tau}$ has a more complicated form and is more concentrated at $\tau$.
+    \item Thus $\widehat{\tau}$ is more precise under ReM than a CRE.
+    \item We can stil use \citet{neyman1923application}'s conservative CIs but it is overly conservative.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{6.2 Regression adjustment}
+  \begin{itemize}
+    \item In a case that we do not conduct rerandomization in a design stage but we want to adjust the covariate imbalance in the analysis stage, we practice several \textit{regression adjustment} stratagies.
+    \item Covariate-adjusted FRT: the covariates $\bm{X}$ are fixed and under $H_{0F}$ the observed outcomes are all fixed.
+    \begin{itemize}
+      \item Recall $H_{0F}$: $Y_i(1)=Y_i(0)$ for $i=1,\dots,n$.
+    \end{itemize}
+    \item Here we can compute the test statistic $T = T(\bm{Z},\bm{Y},\bm{X})$.
+    \item There are two general strategies to construct $T$.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{6.2 Regression adjustment}
+  \begin{keybox}{Definition~6.2 (pseudo-outcome strategy for covariate-adjusted FRT)}
+    We can construct the test statistic based on the residuals from fitted statistical models. We can regression $Y_i$ on $X_i$ to obtain residuals $\widehat{\varepsilon}_i$ and then treat $\widehat{\varepsilon}_i$ as the pseudo outcome to construct test statistics.
+  \end{keybox}
+  \begin{keybox}{Definition~6.3 (model-output strategy for covariate-adjusted FRT)}
+    We can use a regression coefficient as a test statistic. We can regress $Y_i$ on $(Z_i, X_i)$ to obtain the coefficient of $Z_i$ as the test statistic.
+  \end{keybox}
+  \begin{itemize}
+    \item Def.~6.2: We want to ensure that the pseudo-outcome ($\widehat{\tau}_i$) satisfies $H_{0F}$ if the original outcome $Y_i$ satisfies $H_{0F}$.
+    \item Def.~6.3: We want to use the coefficient of $Z_i$ to measure the deviation from $H_{0F}$.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{6.2 Regression adjustment}
+  \begin{itemize}
+    \item Direct estimation of the average causal effect $\tau$ that adjusts for the observed covariates.
+    \item \citet{fisher1934statistical} proposed ANCOVA to improve efficiency: running OLS of $Y_i$ on $(Z_i,Y_i,1)$ and obtaining the coefficient of $Z_i$ as an estimator for $\tau$.
+    \item Reanalysis of ANCOVA under the \citet{neyman1923application}'s potential outcome framework.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{6.2 Regression adjustment}
+  \begin{itemize}
+    \item \citet{freedman2008regression_1,freedman2008regression_2}:
+    \begin{enumerate}
+      \item $\widehat{\tau}_F$ is biased but the simple difference in means estimator $\widehat{\tau}$ is unbiased.
+      \item The asymptotic variance of $\widehat{\tau}_F$ may be even larger than that of $\widehat{\tau}$ when $n_1\neq n_0$.
+      \item The standard error from the OLS is inconsistent for the true standard error of $\widehat{\tau}_F$ under the CRE.
+    \end{enumerate}
+    \item \citet{lin2013agnostic}:
+    \begin{enumerate}
+      \item The bias of $\widehat{\tau}_F$ is small in large samples and it goes to zero as $n\to\infty$.
+      \item We can improbe the asymptotic efficiency of both $\widehat{\tau}$ and $\widehat{\tau}_F$ by using the coefficient of $Z_i$ in the OLS of $Y_i$ on $(1,Z_i,Y_i,Z_i\times Y_i)$. Let $\widehat{\tau}_L$ be the proposed estimator by \citet{lin2013agnostic} then the EHW standard error is a conservative estimator for the true standard error of $\widehat{\tau}_L$ under the CRE.
+      \item The EHW standard error for $\widehat{\tau}_F$ in the OLS fit of $Y_i$ on $(1,Z_i,Y_i)$ is a conservative estimator for the true standard error of $\widehat{\tau}_F$ under the CRE.
+    \end{enumerate}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Eicker–Huber–White Standard Error}
+  Let $\{x_i,y_i\}_{i=1}^{n}$ be i.i.d., $x_i$ be $k\times 1$ and $y_i$ be a scalar. Let $\bm{X}=(x_1^T,\dots,x_n^T)^T$ ($n\times k$) and $\bm{Y}=(y_1,\dots,y_n)^T$ ($n\times 1$). Suppose a regression of $\bm{Y}$ on $\bm{X}$ ($\bm{Y}=\bm{X}^T\beta+\bm{e}$) then trivially, the coefficient of the regression $\widehat{\beta}$ ($k \times 1$) is:
+  \[
+  \widehat{\beta} = (\bm{X}^T\bm{X})^{-1}(\bm{X}^T\bm{Y}),
+  \]
+  then
+  \[
+  \operatorname{var}(\widehat{\tau}) = (\bm{X}^T\bm{X})^{-1}\bm{X}^T\bm{e}^T\bm{e}\bm{X}(\bm{X}^T\bm{X})^{-1}.
+  \]
+  So the moment estimator for the variance of $\widehat{\beta}$ is
+  \[
+  \operatorname{var}(\widehat{\tau}) = (\bm{X}^T\bm{X})^{-1}\bm{X}^T\widehat{\bm{e}}^T\widehat{\bm{e}}\bm{X}(\bm{X}^T\bm{X})^{-1},
+  \]
+  which is \textbf{Eicker–Huber–White} robust variance estimator.
+\end{frame}
+
+\begin{frame}{6.2 Regression adjustment}
+  \begin{itemize}
+    \item Building on \citet{neyman1923application}, we can reduce the variance of the estimator $\widehat{\tau}$ by reducing the variance of the potential outcomes.
+    \item A family of linearly adjusted estimators is 
+    \begin{align*}
+      \widehat{\tau}(\beta_0,\beta_1)
+      &= \frac{1}{n_1}\sum_{i=1}^{n}Z_i(Y_i-\beta_1^TX_i) - \frac{1}{n_0}\sum_{i=1}^{n}(1-Z_i)(Y_i-\beta_0^TX_i)\\
+      &=\{\widehat{\overline{Y}}(1)-\beta_1^T\widehat{\overline{X}}(1)\}-\{\widehat{\overline{Y}}(0)-\beta_0^T\widehat{\overline{X}}(0)\},
+    \end{align*}
+    where $\{\widehat{\overline{Y}}(0),\widehat{\overline{Y}}(1)\}$ is the sample means of the outcomes and $\{\widehat{\overline{X}}(0),\widehat{\overline{X}}(1)\}$ is the sample means of the covariates.
+    \item $\widehat{\tau}(\beta_0,\beta_1)$ tries to reduce the variance of $\widehat{\tau}$ by residualizing the potential outcomes. (Similar motivation to IV?)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{6.2 Regression adjustment}
+  \begin{itemize}
+    \item With $\beta_0=\beta_1=0$, $\widehat{\tau}(0,0)=\widehat{\tau}$.
+    \item It has mean $\tau$ for any fixed values of $\beta_0$ and $\beta_1$ because $\overline{X}=0$.
+    \item We are interested in finding $(\beta_0,\beta_1)$ s.t. minimizes $\operatorname{var}(\widehat{\tau}(\beta_0,\beta_1))$. Hence, this is the \citet{neyman1923application}'s potential outcome framework with $\{\widehat{\overline{Y}}(1)-\beta_1\widehat{\overline{X}}(1),\widehat{\overline{Y}}(0)-\beta_0\widehat{\overline{X}}(0)\}$.
+    \item Therefore, building on \citet{neyman1923application}, this estimator has a variance:
+    \[
+    \operatorname{var}(\widehat{\tau}(\beta_0,\beta_1))
+    =\frac{S^2(1;\beta_1)}{n_1}+\frac{S^2(0;\beta_0)}{n_0}-\frac{S^2(\tau;\beta_1,\beta_0)}{n}.
+    \]
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{6.2 Regression adjustment}
+  \begin{itemize}
+    \item Similarly, we obtain the \citet{neyman1923application}'s conservative variance:
+    \[
+    \widehat{V}(\beta_0,\beta_1)=\frac{\widehat{S}^2(1;\beta_1)}{n_1}+\frac{\widehat{S}^2(0;\beta_0)}{n_0},
+    \]
+    where
+    \begin{gather*}
+      \widehat{S}^2(1;\beta_1)=\frac{1}{n_1-1}\sum_{i=1}^{n}Z_i(Y_i-\gamma_1-\beta_1^TX_i)\\,
+      \widehat{S}^2(0;\beta_0) = \frac{1}{n_0-1}\sum_{i=1}^{n}(1-Z_i)(Y_i-\gamma_0-\beta_0^TX_i),
+    \end{gather*}
+    with $\gamma_1=\dfrac{1}{n_1}\sum_{i=1}^{n}Z_i(Y_i-\beta_1^TX_i)$ and $\gamma_0=\dfrac{1}{n_0}\sum_{i=1}^{n}(1-Z_i)(Y_i-\beta_0^TX_i)$.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{6.2 Regression adjustment}
+  To find $(\beta_0,\beta_1)$ s.t. minimizes $\widehat{V}(\beta_0,\beta_1)$, we solve the following obejcts:
+  \[
+  \min_{\gamma_1,\beta_1}Z_i(Y_i-\gamma_1-\beta_1^TX_i)^2,\quad \min_{\gamma_0,\beta_0}(1-Z_i)(Y_i-\gamma_0-\beta_0^TX_i)^2.
+  \]
+  Finally, we obtain the final estimator:
+  \[
+  \widehat{\tau}(\widehat{\beta}_1,\widehat{\beta}_0)
+  = \{
+    \widehat{\overline{Y}}(1)-\widehat{\beta}^T\widehat{\overline{X}}(1)
+  \}
+  -
+  \{
+    \widehat{\overline{Y}}(0)-\widehat{\beta}_0^T\widehat{\overline{X}}(0)
+  \}.
+  \]
+  Obviously\footnote{The mean of residuals equals zero.},
+  \begin{equation}
+  \widehat{\overline{Y}}(1)=\widehat{\gamma}_1+\widehat{\beta}_1^T\widehat{\overline{X}}(1),\quad \widehat{\overline{Y}}(0)=\widehat{\gamma}_0+\widehat{\beta}_0^T\widehat{\overline{X}}(0).
+  \label{eq:6.3}
+  \end{equation}
+  Then we rewrite the estimator as:
+  \begin{equation}
+    \widehat{\tau}(\widehat{\beta}_1,\widehat{\beta}_2)=\widehat{\gamma}_1-\widehat{\gamma}_0.
+    \label{eq:6.4}
+  \end{equation}
+\end{frame}
+
+\begin{frame}{6.2 Regression adjustment}
+  \begin{keybox}{Proposition~6.2}
+    The estimator $\widehat{\tau}(\widehat{\beta}_1,\widehat{\beta}_2)$ in \eqref{eq:6.4} equals the coefficient of $Z_i$ in the OLS fit of $Y_i$ on $(1,Z_i,X_i,Z_i\times X_i)$, which is \citet{lin2013agnostic}'s estimator $\widehat{\tau}_L$ introduced before.
+    \label{prop-6-2}
+  \end{keybox}
+  {
+    
+    Proof.\\
+    Let $Y_i=a+bZ_i+c^TX_i+d^T(Z_iX_i)+e_i$ be regression of $Y_i$ on $(1,Z_i,X_i,Z_i\times X_i)$. We have $Y_i=a+c^TX_i$ for control group $(Z_i=0)$ and $Y_i=a+b+(c+d)^TX_i$ for treatment group $(Z_i=1)$. Recall \eqref{eq:6.3}, then we obtain 
+    \[
+    a=\widehat{\gamma}_0,\quad b=\widehat{\beta}_1, \quad a+b=\widehat{\gamma}_1, \quad c+d=\widehat{\beta}_1.
+    \]
+    Hence, $b=\widehat{\gamma}_1-\widehat{\gamma}_0. \quad \Box$
+  }
+\end{frame}
+
+\begin{frame}{6.2 Regression adjustment}
+  The \citet{neyman1923application}'s conservative variance estimator for $\widehat{\tau}_L$ is
+  \[
+  \widehat{V}(\widehat{\beta}_1,\widehat{\beta}_2)
+  =\frac{1}{n_1(n_1-1)}\sum_{i=1}^{n}Z_i(Y_i-\widehat{\gamma}_1-\widehat{\beta}_1^TX_i)^2+
+  \frac{1}{n_0(n_0-1)}\sum_{i=1}^{n}(1-Z_i)(Y_i-\widehat{\gamma}_0-\widehat{\beta}_0^TX_i)^2.
+  \]
+  \begin{itemize}
+    \item \citet{lin2013agnostic} further showed that the EHW standard error from the OLS in Prop.~\ref{prop-6-2} is almost identical to $\widehat{V}(\widehat{\beta}_1,\widehat{\beta}_2)$ which is a conservative estimator of the true standard error of $\widehat{\tau}_L$ under the CRE.
+    \item This is because we do not assume that the linear model is correctly specified and the EHW standard error is robust to model misspecification.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{6.2 Regression adjustment}
+  \begin{itemize}
+    \item The estimator $\widehat{\tau}(\widehat{\beta}_1,\widehat{\tau}_2)$ uses two estimated coefficients then this uncertainty may cause finite-sample bias in the final estimator.
+    \item \citet{lin2013agnostic} showed that this issue goes away asymptotically\footnote{The asymptotic theory requires a large sample size and some regularity condigtions on the potential outcomes and covariates.}.
+    \item In finite samples, regression adjustment can be \textbf{even harmful} due to the additional uncertainty in the estimated coefficients $\widehat{\beta}_1$ and $\widehat{\beta}_0$.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{6.2 Regression adjustment}
+  \begin{itemize}
+    \item We can view \citet{lin2013agnostic}'s estimator as as \textit{predictive estimator} based on OLS fits of the potential outcomes on the covariates.
+    \item Using data from both groups:
+    \[
+    \widehat{\mu}_1(X)=\widehat{\gamma}_1+\widehat{\beta}_1^TX,\quad 
+    \widehat{\mu}_0(X)=\widehat{\gamma}_0+\widehat{\beta}_0^TX.
+    \]
+    \item Ideally, we want to estimate the average causal effect $\tau=n^{-1}\sum_{i=1}^{n}(Y_i(1)-Y_i(0))$ but we cannot observe both $Y_i(1),Y_i(0)$ jointly. 
+    \item Here, we use the prediction models then we obtain the following predictive estimator:
+    \[
+    \widehat{\tau}_{\text{pred}}=\frac{1}{n}\left\{
+      \sum_{Z_i=1}^{}Y_i+\sum_{Z_i=0}^{}\widehat{\mu}_1(X_i)-\sum_{Z_i=1}^{}\widehat{\mu}_0(X_i)-\sum_{Z_i=0}^{}Y_i
+    \right\}.
+    \]
+    \item $\widehat{\tau}_{\text{pred}}=\widehat{\tau}_L$.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{6.2 Regression adjustment}
+  \begin{itemize}
+    \item If we predict all the potential outcomes, the we have the following \textit{projective estimator}:
+    \[
+    \widehat{\tau}_{\text{proj}}=\frac{1}{n}\sum_{i=1}^{n}(\widehat{\mu}_1(X_i)-\widehat{\mu}_0(X_i)).
+    \]
+    \item $\widehat{\tau}_{\text{proj}}=\widehat{\tau}_L$
+
+    {
+      \small
+      Proof.
+      \begin{align*}
+        \widehat{\tau}_{\text{proj}}
+        &=\frac{1}{n}\sum_{i=1}^{n}(\widehat{\gamma}_1+\widehat{\beta_1}^TX_i-\gamma_0-\widehat{\beta_0}^TX_i)
+        =\frac{1}{n}\sum_{i=1}^{n}(\widehat{\gamma}_1-\widehat{\gamma}_0)+(\widehat{\beta}_1-\widehat{\beta}_0)^T\frac{1}{n}\sum_{i=1}^{n}X_i\\
+        &=\widehat{\gamma}_1-\widehat{\gamma}_0
+        =\widehat{\tau}_L.\quad (\because \frac{1}{n}\sum_{i=1}^{n}X_i=0)\quad\Box
+      \end{align*}
+    }
+    \item Here, we focus on linear projection but the predictor does not always have to be a linear predictor.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[label=lin-cov-imbalance]{6.2 Regression adjustment}
+  The linearly adjusted estimator has an equivalent form\footnote{$\widehat{\tau}$ and $\widehat{\tau}_X$ are the difference-in-means estimator for outcomes and covariates, respectively.}
+  \begin{equation}
+    \widehat{\tau}(\beta_1,\beta_0)=\widehat{\tau}-\gamma^T\widehat{\tau}_X,
+    \label{eq:6.11}
+  \end{equation}
+  where $\gamma=\dfrac{n_0}{n}\beta_1+\dfrac{n_1}{n}\beta_0$, so we can also rewrite it as $\widehat{\tau}(\gamma)=\widehat{\tau}(\beta_1,\beta_0)$. Similarly, \citet{lin2013agnostic}'s estimator has an equivalent form
+  \begin{equation}
+    \widehat{\tau}_L=\widehat{\tau}-\widehat{\gamma}^T\widehat{\tau}_X.
+    \label{eq:6.12}
+  \end{equation}
+  \vfill
+  \hfill\hyperlink{pr-lin-cov-imbalance<1>}{\beamergotobutton{Proof}}
+\end{frame}
+
+
+\begin{frame}{6.2 Regression adjustment}
+  \begin{itemize}
+    \item Eq.~\eqref{eq:6.11} and \eqref{eq:6.12} essentially subtract some linear combinations of the difference in means of the covariates.
+    \item Since $\widehat{\tau}$ and $\widehat{\tau}_X$ are correlated under the CRE (in general), the covariate adjustment with an appropriately chosen $\gamma$ reduces the variance of $\widehat{\tau}$.
+    \item The final estimators depend only on $\gamma$ or $\widehat{\gamma}$, so the choice of the $\beta$-coefficients is \textbf{not unique}.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{6.2 Regression adjustment}
+  \begin{itemize}
+    \item Rerandomization and \citet{lin2013agnostic}'s regression adjustment are duals.
+    \item When $a$ is small, the asymptotic distribution of $\widehat{\tau}$ under ReM is almost identical to the asymptotic distribution of $\widehat{\tau}_L$ under the CRE.
+    \item $\leadsto$ ReM uses covariates in the \textit{design stages} and \citet{lin2013agnostic}'s regression adjustment uses covariates in the \textit{analysis stages}. 
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[label=prop-6-3]{6.2 Regression adjustment}
+  If we have discrete covariate $C_i$ with $K$ covariates, we can create $K-1$ centered dummy variables
+  \[
+  X_i = (I(C_i=1)-\pi_{[1]},\dots,I(C_i=K-1)-\pi_{[K-1]}),
+  \]
+  where $\pi_{[k]}$ is the proportion of unites with $C_i=k$. In this case, \citet{lin2013agnostic}'s regression adjustment is equivalent to post-stratification.
+  
+  \begin{keybox}{Proposition~6.3}
+    $\widehat{\tau}_L$ based in $X_i$ is numerically identical to the post-stratification estimator $\widehat{\tau}_{PS}$ based on $C_i$.
+  \end{keybox}
+  \vfill
+  \hfill\hyperlink{pr-prop-6-3<1>}{\beamergotobutton{Proof}}
+\end{frame}
+
+\begin{frame}{6.2 Regression adjustment}
+  \begin{itemize}
+    \item An important covariate $X$ in many studies is the lagged outcome before the treatment
+    \begin{itemize}
+      \item The covariate $X$ is the pre-test score if the outcome $Y$ is the post-test score in educational research
+      \item The covariate $X$ is the log wage before the job training program if the outcome $Y$ is the log wage after the job training program.
+     \end{itemize}
+     \item With lagged covariates, a popular estimator is the \textit{gain score} or \textit{difference-in-difference} estimator with $\beta_1=\beta_0=0$ in $\widehat{\tau}(\beta_1,\beta_0)$:
+     \begin{align*}
+      \widehat{\tau}(1,1)
+      &=\frac{1}{n_1}\sum_{i=1}^{n}Z_i(Y_i-X_i)-\frac{1}{n_0}\sum_{i=1}^{n}(1-Z_i)(Y_i-X_i)\\
+      &=\left\{\widehat{\overline{Y}}(1)-\widehat{\overline{Y}}(0)\right\}-\left\{\widehat{\overline{X}}(1)-\widehat{\overline{X}}(0)\right\}.
+     \end{align*}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{6.2 Regression adjustment}
+  \begin{itemize}
+    \item $\widehat{\tau}(1,1)$ is unbiased with a conservative variance estimator:
+    \[
+    \widehat{V}(1,1)=\frac{1}{n_1(n_1-1)}\sum_{i-1}^{n}Z_i\{g_i-\widehat{\overline{g}}(1)\}^2+\frac{1}{n_0(n_0-1)}\sum_{i=1}^{n}(1-Z_i)\{g_i-\widehat{\overline{g}}(0)\}^2,
+    \]
+    with $g_i=Y_i-X_i$ and sample means of the gain score $\widehat{\overline{g}}(0),\widehat{\overline{g}}(1)$.
+    \item Theoretically, \citet{lin2013agnostic}'s estimator is always more efficient but sufferes from finite sample bias while $\widehat{\tau}(1,1)$ is unbiased.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{6.2 Regression adjustment}
+  \begin{itemize}
+    \item Suppose an experiment stratified on a discrete variable $C$ and we also observe additional covariates $X$.
+    \item We can extend \citet{lin2013agnostic}'s estimator to the SRE.
+    \item Let $\widehat{\tau}_{L,[k]}$ be \citet{lin2013agnostic}'s estimator within strata:
+    \[
+    \widehat{\tau}_{L,S}=\sum_{k=1}^{K}\pi_{[k]}\widehat{\tau}_{L,[k]}.
+    \]
+    \item A conservative variance estimator is
+    \[
+    \widehat{V}_{L,S}=\sum_{k=1}^{K}\pi_{[k]}^2\widehat{V}_{\text{EHW},[k]}.
+    \]
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{6.3 Unification, combination and comparison}
+  \begin{itemize}
+    \item \citet{li2020rerandomization} unified the literature and showed that we can combine rerandomization and regression adjustment.
+    \item If we rerandomize in the design stage, we can use \citet{lin2013agnostic}'s estimator with the EHW standard error in the analysis stage.
+    \item It improvies covariate balance in the design stafe and estimation efficiency in the analysis stage.
+  \end{itemize}
+\end{frame}
+
+
+
+
+\begin{frame}[label=pr-neymanian_cov]{Proof of Eq.~\eqref{eq:neymanian_cov}}
+  \citet{neyman1923application} derives 
+  $$\operatorname{var}(\widehat{\tau})=\frac{S^2(1)}{n_1}+\frac{S^2(0)}{n_0}-\frac{S^2(\tau)}{n}.$$
+  In this case, we replace $\widehat{\tau}$ with $\widehat{\tau}_X$ and because $X_i(0)=X_i(1)=X_i$, then $S_X^2(1)=S_X^2(0)=S_X^2$ and $S_X^2(\tau)=S_X^2\{X(1)-X(0)\}=0$. Hence,
+  \[
+  \operatorname{cov}(\widehat{\tau}_X) = \frac{1}{n_1}S_X^2 + \frac{1}{n_0}S_X^2. \quad \Box
+  \]
+  \vfill
+  \hfill\hyperlink{neymanian_cov<1>}{\beamerreturnbutton{Back}}
+\end{frame}
+
+\begin{frame}[label=pr-lemma-6-1]{Proof of Lemma~\ref{lemma1}}
+  \small
+  Let $X_i^*=b_0+BX_i$ then
+  \begin{align*}
+    \widehat{\tau}_{X^*}
+    &= \frac{1}{n_1}\sum_{i=1}^{n}Z_iX_i^* - \frac{1}{n_0}\sum_{i=1}^{n}(1-Z_i)X_i^*\\
+    &= \left\{\frac{1}{n_1}\sum_{i=1}^{n}Z_ib_0 - \frac{1}{n}\sum_{1}^{n}(1-Z_i)b_0\right\} + \left\{\frac{1}{n_1}\sum_{i=1}^{n}Z_iBX_i - \frac{1}{n_0}\sum_{i=1}^{n}(1-Z_i)BX_i\right\} \\
+    &= B\widehat{\tau}_X.
+  \end{align*}
+  Substituting $\widehat{\tau}_{X^*}=B\widehat{\tau}_X$, 
+  \[
+  \operatorname{cov}(\widehat{\tau}_{X^*}) 
+  = \operatorname{cov}(B\widehat{\tau}_X) 
+  = B\operatorname{cov}(\widehat{\tau}_X)B^T.
+  \]
+  Because $B$ is invertible, 
+  \[
+  M^* =\widehat{\tau}_{X^*}^T\operatorname{cov}(\widehat{\tau}_{X^*})^{-1}\widehat{\tau}_{X^*}
+  = \widehat{\tau}_X^TB^T(B^T)^{-1}\operatorname{cov}(\widehat{\tau}_X)^{-1}B^{-1}B\widehat{\tau}_X = M. \quad \Box
+  \]
+  \vfill
+  \hfill\hyperlink{lemma-6-1<1>}{\beamerreturnbutton{Back}}
+\end{frame}
+
+
+\begin{frame}[label=pr-lin-cov-imbalance]{Proof for Eq.~\eqref{eq:6.11} and \eqref{eq:6.12}}
+
+  {
+    \small
+    Recall 
+    \[
+    \widehat{\tau}(\beta_1,\beta_0)=\left\{\widehat{\overline{Y}}(1)-\beta_1^T\widehat{\overline{X}}(1)\right\}-\left\{\widehat{\overline{Y}}(0)-\beta_0^T\widehat{\overline{X}}(0)\right\}, 
+    \quad
+    \widehat{\tau}_X = \widehat{\overline{X}}(1)-\widehat{\overline{X}}(0).
+    \]
+    By definition, 
+    \[
+    \widehat{\tau}(\beta_1,\beta_0)=\left\{\widehat{\overline{Y}}(1)-\widehat{\overline{Y}}(0)\right\}-\left\{\beta_1^T\widehat{\overline{X}}(1)-\beta_0^T\widehat{\overline{X}}(0)\right\}=\widehat{\tau}-\left\{\beta_1^T\widehat{\overline{X}}(1)-\beta_0^T\widehat{\overline{X}}(0)\right\}.
+    \] 
+    Hence, we verify $\beta_1^T\widehat{\overline{X}}(1)-\beta_0^T\widehat{\overline{X}}(0)=\gamma^T\widehat{\tau}_X.$
+    Here, $\overline{X}=0$, then $\dfrac{n_1}{n}\widehat{\overline{X}}(1)+\dfrac{n_0}{n}\widehat{\overline{X}}(0)=0.$
+    Substituting $\gamma=\dfrac{n_0}{n}\beta_1+\dfrac{n_1}{n}\beta_0$,
+    \begin{align*}
+      \gamma^T\widehat{\tau}_X
+    &= \frac{n_0}{n}\beta_1^T\widehat{\overline{X}}(1)-\frac{n_0}{n}\beta_1^T\widehat{\overline{X}}(0)+\frac{n_1}{n}\beta_0^T\widehat{\overline{X}}(1)-\frac{n_1}{n}\beta_0^T\widehat{\overline{X}}(0)\\
+    &= \beta_1^T\widehat{\overline{X}}(1)-\beta_0^T\widehat{\overline{X}}(0). \quad \Box
+    \end{align*}
+    We similarly obtain Eq.~\eqref{eq:6.12}. $\Box$ 
+  }
+  \vfill
+  \hfill\hyperlink{lin-cov-imbalance<1>}{\beamerreturnbutton{Back}}
+\end{frame}
+
+\begin{frame}[label=pr-prop-6-3]{Proof for Prop.~6.3}
+  Recall the projective estimator $$\widehat{\tau}_{L}=\dfrac{1}{n}\sum_{i=1}^{n}\{\widehat{\mu}_1(X_i)-\widehat{\mu}_0(X_i)\}.$$
+  By definition, $\widehat{\mu}_1(X_i)=\widehat{\mu}_1(C_i)$, then
+  \begin{align*}
+    \widehat{\tau}_L
+    =\frac{1}{n}\sum_{k=1}^{K}\sum_{i;C_i=k}^{}\{\widehat{\mu}_1(k)-\widehat{\mu}_0(k)\}
+    =\sum_{k=1}^{K}\frac{n_{[k]}}{n}\{\widehat{\mu}_1(k)-\widehat{\mu}_0(k)\}
+    =\sum_{k=1}^{K}\pi_{[k]}\widehat{\tau}_{[k]}=\widehat{\tau}_{PS}.\quad \Box
+  \end{align*}
+  \vfill
+  \hfill\hyperlink{prop-6-3<1>}{\beamerreturnbutton{Back}}
+\end{frame}
+% =========================
+
+% =========================
+\section{}
+\begin{frame}[allowframebreaks, noframenumbering]{References}
+  \beamerdefaultoverlayspecification{}
+  \small
+  \bibliography{../references}
+\end{frame}
+
+\end{document}
